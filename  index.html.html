@@ -1,0 +1,4717 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#080B14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="INQUEBRATABLE">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<title>INQUEBRATABLE — Silvia Beltrán</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+
+/* ═══════════════════════════════════════
+   TOKENS — azul noche · magenta · crema
+═══════════════════════════════════════ */
+:root {
+  /* fondos — azul noche profundo */
+  --bg:       #080B14;
+  --bg2:      #0C1020;
+  --card:     #111628;
+  --card2:    #161D32;
+
+  /* acento principal — crema calida */
+  --gold:     #F0E6D3;
+  --gold2:    #FAF3EA;
+
+  /* acento emocional — magenta/rosa futurista */
+  --terra:    #C4306A;
+  --rose:     #E0508A;
+
+  /* texto */
+  --cream:    #F0E8DC;
+  --sand:     #C8BAA8;
+  --muted:    rgba(240,232,220,0.42);
+  --muted2:   rgba(240,232,220,0.25);
+
+  /* bordes y brillos */
+  --border:   rgba(196,48,106,0.18);
+  --border2:  rgba(196,48,106,0.30);
+  --glow:     rgba(196,48,106,0.08);
+}
+
+/* ═══════════════════════════════════════
+   BASE
+═══════════════════════════════════════ */
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+
+html { overflow:hidden; height:100%; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  background: var(--bg);
+  color: var(--cream);
+  height: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* textura de grano muy suave */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.022'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9500;
+}
+
+/* niebla ambiental — magenta + azul */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 55% 45% at 15% 90%, rgba(196,48,106,0.09) 0%, transparent 65%),
+    radial-gradient(ellipse 45% 35% at 85% 10%, rgba(120,60,180,0.07) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+canvas#particles {
+  position: fixed; inset: 0;
+  z-index: 1; pointer-events: none;
+}
+
+/* ═══════════════════════════════════════
+   NAVEGACIÓN
+═══════════════════════════════════════ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 24px;
+  height: 56px;
+  background: rgba(6,8,18,0.92);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-bottom: 1px solid rgba(196,48,106,0.12);
+  z-index: 8000;
+}
+
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 12px; letter-spacing: 5px;
+  color: var(--gold); text-transform: uppercase; font-weight: 400;
+}
+
+.nav-tabs { display: flex; gap: 0; }
+
+.nav-tab {
+  background: none; border: none;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 8px 11px; cursor: pointer;
+  border-radius: 4px;
+  transition: color 0.25s, background 0.25s;
+  white-space: nowrap;
+}
+.nav-tab:hover { color: var(--sand); background: rgba(196,48,106,0.07); }
+.nav-tab.active { color: var(--gold); background: rgba(196,48,106,0.10); }
+
+/* hamburger */
+.nav-burger {
+  display: none; flex-direction: column; gap: 5px;
+  background: none; border: none; cursor: pointer; padding: 4px;
+}
+.nav-burger span {
+  display: block; width: 20px; height: 1.5px;
+  background: var(--gold); border-radius: 2px;
+  transition: transform 0.3s, opacity 0.3s;
+}
+.nav-burger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.nav-burger.open span:nth-child(2) { opacity: 0; }
+.nav-burger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+/* ── DRAWER FUTURISTA ── */
+.nav-drawer {
+  position: fixed; top: 0; right: -100%;
+  width: min(300px, 85vw); height: 100vh;
+  background:
+    linear-gradient(160deg, rgba(196,48,106,0.06) 0%, transparent 45%),
+    rgba(5, 7, 16, 0.98);
+  backdrop-filter: blur(32px) saturate(1.6);
+  -webkit-backdrop-filter: blur(32px) saturate(1.6);
+  border-left: 1px solid rgba(196,48,106,0.20);
+  box-shadow: -8px 0 48px rgba(0,0,0,0.8), inset -1px 0 0 rgba(196,48,106,0.06);
+  padding: 80px 0 48px;
+  display: flex; flex-direction: column; gap: 0;
+  transition: right 0.42s cubic-bezier(.4,0,.2,1);
+  z-index: 7999;
+  overflow: hidden;
+}
+
+/* scan-lines decorativas */
+.nav-drawer::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(196,48,106,0.015) 3px,
+    rgba(196,48,106,0.015) 4px
+  );
+  pointer-events: none; z-index: 0;
+}
+
+/* título MENÚ */
+.nav-drawer::after {
+  content: 'MENÚ';
+  position: absolute; top: 28px; left: 24px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 8px; letter-spacing: 7px; text-transform: uppercase;
+  color: rgba(240,232,220,0.25);
+  pointer-events: none; z-index: 1;
+}
+
+.nav-drawer.open { right: 0; }
+
+/* ── LINKS: tarjetas modernas ── */
+.nav-drawer-link {
+  position: relative; z-index: 2;
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  align-items: center;
+  gap: 0;
+  padding: 13px 20px 13px 20px;
+  margin: 2px 14px;
+  border-radius: 10px;
+  color: rgba(240,232,220,0.55);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; letter-spacing: 0.3px; font-weight: 300;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: all 0.28s cubic-bezier(.4,0,.2,1);
+  cursor: pointer; background: none; border-top: none;
+  text-align: left; width: calc(100% - 28px);
+  overflow: hidden;
+}
+
+/* icono ⚪️ — blanco, tamaño mediano */
+.nav-drawer-link::before {
+  content: attr(data-icon);
+  font-size: 10px; opacity: 0.5;
+  transition: opacity 0.28s, transform 0.28s;
+  display: flex; align-items: center; justify-content: center;
+  transform: scale(0.9);
+}
+
+/* número — completamente oculto */
+.nav-drawer-link::after {
+  display: none;
+}
+
+.nav-drawer-link:hover,
+.nav-drawer-link.drawer-active {
+  color: var(--cream);
+  background: rgba(196,48,106,0.10);
+  border-color: rgba(196,48,106,0.24);
+  box-shadow: 0 0 20px rgba(196,48,106,0.07);
+}
+.nav-drawer-link:hover::before,
+.nav-drawer-link.drawer-active::before {
+  opacity: 1; transform: scale(1.1);
+}
+
+/* separadores y etiquetas de sección */
+.drawer-section-divider {
+  position: relative; z-index: 2;
+  margin: 12px 18px 8px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(196,48,106,0.18), transparent);
+}
+.drawer-section-label {
+  position: relative; z-index: 2;
+  padding: 0 20px;
+  font-size: 8px; letter-spacing: 5px; text-transform: uppercase;
+  color: rgba(196,48,106,0.4);
+  font-family: 'DM Sans', sans-serif;
+  margin-bottom: 4px;
+}
+
+/* overlay */
+.drawer-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,4,10,0.65);
+  backdrop-filter: blur(2px);
+  z-index: 7998; opacity: 0; pointer-events: none;
+  transition: opacity 0.35s;
+}
+.drawer-overlay.open { opacity: 1; pointer-events: all; }
+
+/* ═══════════════════════════════════════
+   SCREENS
+═══════════════════════════════════════ */
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(.4,0,.2,1);
+  transform: translateY(18px);
+  overflow-y: auto; overflow-x: hidden;
+  z-index: 10;
+}
+.screen.active  { opacity: 1; pointer-events: all; transform: translateY(0); }
+.screen.exit-up   { opacity: 0; transform: translateY(-18px); }
+.screen.exit-down { opacity: 0; transform: translateY(18px); }
+
+.screen-scroll {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding-bottom: 48px;
+}
+.screen-scroll::-webkit-scrollbar { width: 2px; }
+.screen-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* etiqueta de sección */
+.screen-label {
+  font-size: 10px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 22px;
+  display: flex; align-items: center; gap: 14px; opacity: 0.85;
+}
+.screen-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--border2), transparent);
+}
+
+/* ═══════════════════════════════════════
+   PANTALLA: INICIO
+═══════════════════════════════════════ */
+#s-inicio {
+  justify-content: center; align-items: center; text-align: center;
+  padding: 80px 28px 48px;
+  background:
+    radial-gradient(ellipse 65% 50% at 50% 85%, rgba(196,48,106,0.14) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 40% at 10% 15%, rgba(120,60,180,0.09) 0%, transparent 60%),
+    radial-gradient(ellipse 30% 35% at 88% 20%, rgba(196,48,106,0.07) 0%, transparent 55%);
+  min-height: 100vh;
+}
+
+.inicio-ornament {
+  width: 1px; height: 44px;
+  background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+  margin: 0 auto 36px;
+  animation: growLine 1.8s ease forwards;
+}
+@keyframes growLine {
+  from { height: 0; opacity: 0; }
+  to   { height: 44px; opacity: 1; }
+}
+
+.inicio-eyebrow {
+  font-size: 10px; letter-spacing: 5px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 28px; opacity: 0.8;
+  animation: riseUp 1s ease 0.3s both;
+}
+
+.inicio-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(44px, 9.5vw, 96px);
+  font-weight: 300; letter-spacing: clamp(4px, 1.2vw, 10px);
+  text-transform: uppercase;
+  line-height: 1; margin-bottom: 36px;
+  animation: riseUp 1.2s ease 0.5s both, iridiscente 6s linear infinite;
+  background: linear-gradient(
+    120deg,
+    #F0E6D3 0%,
+    #E8C8D8 15%,
+    #C8A8E8 28%,
+    #A8C8F0 40%,
+    #B8E8E0 52%,
+    #F0D8A8 65%,
+    #F0C0C0 78%,
+    #D8B8F0 88%,
+    #F0E6D3 100%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 20px rgba(196,48,106,0.22));
+}
+@keyframes iridiscente {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.inicio-frase {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: clamp(15px, 3.2vw, 20px);
+  line-height: 1.75; color: var(--sand);
+  max-width: 440px; margin: 0 auto 48px;
+  animation: riseUp 1s ease 0.85s both;
+}
+
+.inicio-divider {
+  width: 40px; height: 1px;
+  background: var(--gold); opacity: 0.4;
+  margin: 0 auto 48px;
+  animation: riseUp 1s ease 0.9s both;
+}
+
+.btn-refugio {
+  display: inline-block;
+  padding: 15px 44px;
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px; letter-spacing: 3.5px; text-transform: uppercase;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: color 0.4s;
+  border-radius: 2px;
+  animation: riseUp 1s ease 1.15s both;
+}
+.btn-refugio::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--terra), var(--rose));
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.45s ease;
+}
+.btn-refugio:hover::before { transform: scaleX(1); }
+.btn-refugio:hover { color: #fff; }
+.btn-refugio span { position: relative; z-index: 1; }
+
+.inicio-autor {
+  font-size: 10px; letter-spacing: 3px; color: var(--muted);
+  margin-top: 44px; text-transform: uppercase;
+  animation: riseUp 1s ease 1.4s both;
+}
+
+@keyframes riseUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════
+   PANTALLA: HISTORIA
+═══════════════════════════════════════ */
+#s-historia {
+  justify-content: center; align-items: center;
+  padding: 90px 28px 60px;
+  background:
+    radial-gradient(ellipse 55% 55% at 80% 45%, rgba(196,48,106,0.09) 0%, transparent 60%),
+    radial-gradient(ellipse 35% 35% at 5% 70%, rgba(120,60,180,0.06) 0%, transparent 55%);
+  min-height: 100vh;
+}
+
+.historia-wrap { max-width: 580px; width: 100%; }
+
+.historia-titulo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(30px, 6vw, 50px);
+  font-weight: 300; line-height: 1.2;
+  color: var(--cream); margin-bottom: 28px;
+}
+.historia-titulo em { color: var(--gold); font-style: italic; }
+
+.historia-p {
+  font-size: 15px; line-height: 1.95;
+  color: rgba(240,232,220,0.72); margin-bottom: 16px;
+}
+.historia-p strong { color: var(--sand); font-weight: 400; }
+
+.historia-firma {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 19px;
+  color: var(--gold); margin: 28px 0 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* botón secundario */
+.btn-soft {
+  display: inline-block;
+  padding: 14px 40px;
+  background: rgba(196,48,106,0.09);
+  border: 1px solid var(--border2);
+  color: var(--gold);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  cursor: pointer; transition: all 0.3s; border-radius: 2px;
+}
+.btn-soft:hover {
+  background: rgba(196,48,106,0.16);
+  border-color: rgba(196,48,106,0.42);
+}
+
+/* ═══════════════════════════════════════
+   PANTALLA: TEST
+═══════════════════════════════════════ */
+#s-test {
+  padding: 72px 28px 60px;
+  background:
+    radial-gradient(ellipse 50% 50% at 20% 60%, rgba(196,48,106,0.08) 0%, transparent 60%);
+  min-height: 100vh;
+}
+
+.test-wrap { max-width: 520px; margin: 0 auto; width: 100%; }
+
+.test-progress-track {
+  width: 100%; height: 3px;
+  background: rgba(196,48,106,0.12);
+  border-radius: 3px; margin-bottom: 36px; overflow: hidden;
+}
+.test-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--terra), var(--gold2));
+  border-radius: 3px; transition: width 0.5s ease;
+}
+
+.test-q-label {
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 14px; opacity: 0.75;
+}
+
+.test-question {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(19px, 4vw, 27px); font-weight: 300;
+  line-height: 1.45; color: var(--cream); margin-bottom: 30px;
+}
+
+.test-options { display: flex; flex-direction: column; gap: 10px; }
+
+.test-option {
+  padding: 15px 20px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.015);
+  color: var(--sand);
+  font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 300;
+  cursor: pointer; text-align: left;
+  transition: all 0.28s; border-radius: 6px;
+}
+.test-option:hover {
+  border-color: rgba(196,48,106,0.35);
+  background: rgba(196,48,106,0.08);
+  color: var(--cream); padding-left: 28px;
+}
+
+/* resultado */
+.test-result { display: none; text-align: center; padding: 12px 0; }
+
+.result-badge {
+  display: inline-block;
+  padding: 5px 18px; border: 1px solid var(--gold);
+  font-size: 9px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 22px; border-radius: 20px;
+  background: rgba(196,48,106,0.07);
+}
+
+.result-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(28px, 6vw, 46px); font-weight: 300;
+  color: var(--cream); margin-bottom: 10px;
+}
+
+.result-bar-track {
+  width: 100%; height: 5px;
+  background: rgba(196,48,106,0.12);
+  border-radius: 5px; margin: 22px 0; overflow: hidden;
+}
+.result-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--terra), var(--rose));
+  border-radius: 5px;
+  transition: width 1.4s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 0 12px rgba(196,48,106,0.4);
+}
+
+.result-desc {
+  font-size: 14.5px; line-height: 1.85;
+  color: rgba(240,232,220,0.7);
+  max-width: 400px; margin: 0 auto 10px;
+}
+.result-motivador {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 18px;
+  color: var(--gold); margin: 16px 0 32px;
+}
+
+.btn-retry {
+  background: none; border: none;
+  color: var(--muted); font-size: 11px; letter-spacing: 2px;
+  text-transform: uppercase; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  margin-top: 10px; text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════
+   PANTALLA: NIVELES
+═══════════════════════════════════════ */
+#s-niveles {
+  padding: 72px 28px 60px;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 55% 40% at 75% 80%, rgba(196,48,106,0.07) 0%, transparent 60%);
+}
+
+.niveles-wrap { max-width: 540px; margin: 0 auto; width: 100%; }
+
+.niveles-intro-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(22px, 5vw, 34px); font-weight: 300;
+  color: var(--cream); line-height: 1.25; margin-bottom: 8px;
+}
+.niveles-intro-title em { color: var(--gold); font-style: italic; }
+.niveles-intro-sub {
+  font-size: 13px; color: var(--muted);
+  line-height: 1.75; margin-bottom: 32px;
+}
+
+.nivel-card {
+  padding: 22px 24px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.012);
+  margin-bottom: 10px; border-radius: 8px;
+  transition: all 0.3s; cursor: default;
+  position: relative; overflow: hidden;
+}
+.nivel-card::before {
+  content: ''; position: absolute;
+  left: 0; top: 0; bottom: 0; width: 2px;
+  background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+  opacity: 0; transition: opacity 0.35s;
+}
+.nivel-card:hover::before { opacity: 1; }
+.nivel-card:hover {
+  border-color: rgba(196,48,106,0.28);
+  background: rgba(196,48,106,0.05);
+}
+.nivel-card.highlight {
+  border-color: rgba(196,48,106,0.35);
+  background: rgba(196,48,106,0.06);
+}
+.nivel-card.highlight::before { opacity: 1; }
+
+.nivel-num {
+  font-size: 9px; letter-spacing: 3.5px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 6px; opacity: 0.75;
+}
+.nivel-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 21px; font-weight: 400;
+  color: var(--cream); margin-bottom: 7px;
+}
+.nivel-desc { font-size: 13px; line-height: 1.72; color: var(--muted); }
+
+.nivel-tu-nivel {
+  display: inline-block;
+  font-size: 8px; letter-spacing: 2px; text-transform: uppercase;
+  background: var(--gold); color: var(--bg);
+  padding: 2px 9px; border-radius: 10px; margin-left: 8px;
+  vertical-align: middle; font-weight: 500;
+}
+
+/* ═══════════════════════════════════════
+   PANTALLA: REFUGIO
+═══════════════════════════════════════ */
+#s-refugio {
+  padding: 72px 28px 60px;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 50% 50% at 50% 25%, rgba(196,48,106,0.07) 0%, transparent 60%);
+}
+
+.refugio-wrap { max-width: 540px; margin: 0 auto; width: 100%; }
+
+/* ── Pregunta del día ── */
+.pregunta-dia-card {
+  background: rgba(196,48,106,0.06);
+  border: 1px solid rgba(196,48,106,0.22);
+  border-radius: 12px;
+  padding: 18px 20px 16px;
+  margin-bottom: 18px;
+}
+.pregunta-dia-label {
+  font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--rose); margin-bottom: 10px;
+}
+.pregunta-dia-texto {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px; font-style: italic;
+  color: var(--cream); line-height: 1.6;
+  margin-bottom: 14px;
+}
+.pregunta-dia-btn {
+  background: none;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  color: var(--rose);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  padding: 9px 16px; cursor: pointer;
+  transition: background 0.25s, color 0.25s;
+}
+.pregunta-dia-btn:hover { background: rgba(196,48,106,0.10); color: #fff; }
+
+.refugio-intro {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 17px; line-height: 1.75;
+  color: var(--sand); margin-bottom: 26px;
+  padding: 16px 20px;
+  border-left: 2px solid rgba(196,48,106,0.3);
+  background: rgba(196,48,106,0.04);
+  border-radius: 0 6px 6px 0;
+}
+
+.refugio-textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+  color: var(--cream);
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 15.5px;
+  padding: 16px 18px; height: 105px; resize: none;
+  outline: none; border-radius: 6px;
+  transition: border-color 0.3s; margin-bottom: 10px;
+}
+.refugio-textarea:focus { border-color: rgba(196,48,106,0.42); }
+.refugio-textarea::placeholder { color: rgba(237,224,206,0.2); }
+
+.btn-publicar {
+  padding: 11px 26px;
+  border: 1px solid var(--border2);
+  background: rgba(196,48,106,0.08);
+  color: var(--gold);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
+  cursor: pointer; transition: all 0.3s; border-radius: 4px;
+}
+.btn-publicar:hover {
+  background: rgba(196,48,106,0.16);
+  border-color: rgba(196,48,106,0.38);
+}
+
+.refugio-divider {
+  height: 1px; background: var(--border);
+  margin: 24px 0;
+}
+
+.refugio-posts {
+  display: flex; flex-direction: column; gap: 10px;
+  max-height: 300px; overflow-y: auto; padding-right: 4px;
+}
+.refugio-posts::-webkit-scrollbar { width: 2px; }
+.refugio-posts::-webkit-scrollbar-thumb { background: var(--border); }
+
+.post-card {
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.018);
+  border-radius: 8px; animation: riseUp 0.4s ease;
+}
+.post-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 15px; line-height: 1.65;
+  color: rgba(240,232,220,0.8); margin-bottom: 10px;
+}
+.post-actions { display: flex; gap: 10px; align-items: center; }
+.post-heart {
+  background: none; border: none;
+  font-size: 13px; color: var(--muted);
+  cursor: pointer; transition: color 0.2s, transform 0.2s; padding: 0;
+}
+.post-heart:hover { transform: scale(1.2); }
+.post-heart.liked { color: #D07070; }
+.post-count { font-size: 11px; color: var(--muted); }
+
+.post-empty {
+  font-size: 13px; color: var(--muted2);
+  text-align: center; padding: 32px;
+  border: 1px dashed var(--border);
+  border-radius: 8px; letter-spacing: 0.5px;
+  font-style: italic; font-family: 'Cormorant Garamond', serif;
+}
+
+/* ═══════════════════════════════════════
+   PANTALLA: RITUAL
+═══════════════════════════════════════ */
+#s-ritual {
+  padding: 72px 28px 60px;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 60% 60% at 50% 50%, rgba(196,48,106,0.08) 0%, transparent 65%);
+}
+
+.ritual-wrap { max-width: 460px; margin: 0 auto; width: 100%; }
+
+.ritual-step {
+  padding: 22px 24px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.015);
+  margin-bottom: 10px; border-radius: 8px;
+  transition: all 0.3s; cursor: pointer;
+}
+.ritual-step:hover,
+.ritual-step.done {
+  border-color: rgba(196,48,106,0.3);
+  background: rgba(196,48,106,0.05);
+}
+
+.step-head {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 6px;
+}
+.step-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px; font-weight: 300; color: var(--gold); width: 22px; flex-shrink: 0;
+}
+.step-check {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; color: transparent;
+  transition: all 0.3s; flex-shrink: 0;
+}
+.step-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px; font-weight: 400; color: var(--cream);
+}
+.step-desc {
+  font-size: 13px; color: var(--muted); line-height: 1.65;
+  padding-left: 36px;
+}
+
+.ritual-breath { margin: 16px 0; display: none; }
+.ritual-breath.active { display: block; text-align: center; }
+.breath-orb {
+  width: 72px; height: 72px; border-radius: 50%;
+  border: 1px solid rgba(196,48,106,0.25);
+  margin: 0 auto 10px;
+  animation: breathe 4.5s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(196,48,106,0.12), rgba(224,80,138,0.05) 60%, transparent);
+}
+@keyframes breathe {
+  0%,100% { transform: scale(0.92); opacity: 0.5; }
+  50%      { transform: scale(1.22); opacity: 1; }
+}
+.breath-label {
+  font-size: 10px; letter-spacing: 3px; color: var(--muted);
+  text-transform: uppercase;
+}
+
+.ritual-writing {
+  width: 100%;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+  color: var(--cream);
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 15px;
+  padding: 13px 16px; height: 80px; resize: none;
+  outline: none; border-radius: 6px;
+  transition: border-color 0.3s;
+  display: none; margin-top: 12px;
+}
+.ritual-writing.active { display: block; }
+.ritual-writing:focus { border-color: rgba(196,48,106,0.38); }
+.ritual-writing::placeholder { color: rgba(237,224,206,0.2); }
+
+.afirmacion-card {
+  margin-top: 28px; padding: 26px 24px;
+  border: 1px solid var(--border2);
+  background: rgba(196,48,106,0.05);
+  border-radius: 10px; text-align: center;
+}
+.afirmacion-eyebrow {
+  font-size: 9px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 14px; opacity: 0.7;
+}
+.afirmacion-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: clamp(19px, 4vw, 25px);
+  color: var(--cream); line-height: 1.55;
+}
+
+/* ═══════════════════════════════════════
+   PANTALLA: CUENTA / MENÚ
+═══════════════════════════════════════ */
+#s-menu {
+  padding: 72px 28px 60px;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 45% 45% at 15% 80%, rgba(196,48,106,0.07) 0%, transparent 60%);
+}
+
+.menu-inner { max-width: 460px; margin: 0 auto; width: 100%; }
+
+.menu-tabs {
+  display: flex; gap: 0; margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.menu-tab-btn {
+  flex: 1; padding: 11px;
+  background: none; border: none;
+  color: var(--muted); font-family: 'DM Sans', sans-serif;
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  cursor: pointer; border-bottom: 2px solid transparent;
+  margin-bottom: -1px; transition: all 0.25s;
+}
+.menu-tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+.menu-panel { display: none; }
+.menu-panel.active { display: block; animation: riseUp 0.3s ease; }
+
+.menu-field { margin-bottom: 14px; }
+.menu-field label {
+  display: block; font-size: 9px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 7px;
+}
+.menu-field input {
+  width: 100%;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+  color: var(--cream);
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  outline: none; transition: border-color 0.25s;
+}
+.menu-field input:focus { border-color: rgba(196,48,106,0.42); }
+.menu-field input::placeholder { color: rgba(237,224,206,0.2); }
+
+.menu-msg {
+  font-size: 12px; min-height: 18px;
+  margin-top: 8px; color: var(--gold);
+  letter-spacing: 0.5px; text-align: center;
+}
+
+.logged-card {
+  padding: 22px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  border-radius: 10px; margin-bottom: 14px;
+}
+.logged-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--terra), var(--rose));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px; color: var(--bg); margin-bottom: 12px;
+}
+.logged-name { font-size: 16px; font-weight: 400; color: var(--cream); margin-bottom: 3px; }
+.logged-nick { font-size: 11px; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; }
+
+.contact-area textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 6px; padding: 12px 14px;
+  color: var(--cream);
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  height: 100px; resize: none; outline: none;
+  transition: border-color 0.25s; margin-bottom: 10px;
+}
+.contact-area textarea:focus { border-color: rgba(196,48,106,0.42); }
+.contact-area textarea::placeholder { color: rgba(237,224,206,0.2); }
+.contact-area label {
+  display: block; font-size: 9px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 7px;
+}
+
+/* ═══════════════════════════════════════
+   BOTÓN UNIVERSAL (btn-gold → ahora btn-cta)
+═══════════════════════════════════════ */
+.btn-gold, .btn-cta {
+  display: inline-block;
+  padding: 14px 42px;
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10.5px; letter-spacing: 3.5px; text-transform: uppercase;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: color 0.38s; border-radius: 2px;
+}
+.btn-gold::before, .btn-cta::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, var(--terra), var(--rose));
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.42s ease;
+}
+.btn-gold:hover::before, .btn-cta:hover::before { transform: scaleX(1); }
+.btn-gold:hover, .btn-cta:hover { color: #fff; }
+.btn-gold span, .btn-cta span { position: relative; z-index: 1; }
+
+/* ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ */
+.toast {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--gold);
+  padding: 12px 22px; border-radius: 6px;
+  font-size: 12px; color: var(--cream);
+  letter-spacing: 0.5px; z-index: 9999;
+  opacity: 0; transition: all 0.3s; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media (max-width: 680px) {
+  .nav-tabs { display: none; }
+  .nav-burger { display: flex; }
+  .inicio-title { font-size: clamp(40px, 11vw, 68px); letter-spacing: 3px; }
+  .inicio-frase { font-size: 15px; }
+}
+@media (min-width: 681px) {
+  .nav-drawer { display: none !important; }
+  .drawer-overlay { display: none !important; }
+}
+
+/* ═══════════════════════════════════════
+   NUEVAS PANTALLAS — base
+═══════════════════════════════════════ */
+.new-wrap {
+  max-width: 540px; margin: 0 auto; width: 100%;
+  padding: 28px 0 40px;
+}
+.new-intro {
+  font-size: 13px; line-height: 1.8; color: var(--muted);
+  margin-bottom: 24px;
+}
+
+/* ── NOTIF BELL ── */
+.nav-notif-btn {
+  position: relative; background: none; border: none;
+  cursor: pointer; padding: 6px 8px; margin-left: 4px;
+  display: flex; align-items: center;
+}
+.nav-notif-icon { font-size: 16px; opacity: 0.6; transition: opacity 0.2s; }
+.nav-notif-btn:hover .nav-notif-icon { opacity: 1; }
+.nav-notif-badge {
+  position: absolute; top: 2px; right: 2px;
+  min-width: 16px; height: 16px; border-radius: 8px;
+  background: var(--terra); color: #fff;
+  font-size: 9px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 3px; font-family: 'DM Sans', sans-serif;
+}
+
+/* ── PROGRESO ── */
+.progreso-racha-card {
+  text-align: center; padding: 28px 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px; background: var(--card);
+  margin-bottom: 20px;
+  transition: border-color 0.5s;
+}
+.progreso-racha-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(52px, 14vw, 80px); font-weight: 300;
+  color: var(--cream); line-height: 1;
+}
+.progreso-racha-label {
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--muted); margin-top: 6px;
+}
+.progreso-racha-sub {
+  font-size: 12px; color: var(--muted2); margin-top: 4px;
+}
+.progreso-stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; margin-bottom: 20px;
+}
+.progreso-stat {
+  text-align: center; padding: 16px 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px; background: var(--card);
+}
+.progreso-stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px; font-weight: 300; color: var(--gold);
+}
+.progreso-stat-lbl {
+  font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted2); margin-top: 4px;
+}
+.btn-recaida {
+  width: 100%; padding: 14px;
+  background: rgba(196,48,106,0.06);
+  border: 1px dashed rgba(196,48,106,0.35);
+  color: var(--rose);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+  cursor: pointer; border-radius: 6px;
+  transition: all 0.3s; margin-bottom: 12px;
+}
+.btn-recaida:hover { background: rgba(196,48,106,0.12); }
+.recaida-apoyo {
+  padding: 16px 18px; margin-bottom: 20px;
+  border-left: 2px solid rgba(196,48,106,0.4);
+  background: rgba(196,48,106,0.04);
+  border-radius: 0 8px 8px 0;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 16px; line-height: 1.7;
+  color: var(--cream);
+  animation: riseUp 0.4s ease both;
+}
+.progreso-hist-title {
+  font-size: 10px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--muted2); margin-bottom: 12px;
+}
+.progreso-hist, .terapia-hist {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.hist-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px; background: var(--card);
+}
+.hist-dot { color: var(--rose); font-size: 12px; flex-shrink: 0; }
+.hist-fecha { color: var(--cream); font-size: 13px; flex: 1; }
+.hist-label { font-size: 11px; color: var(--muted); }
+.hist-empty {
+  font-size: 13px; color: var(--muted2);
+  padding: 20px 0; text-align: center; font-style: italic;
+}
+
+/* ── TERAPIA ── */
+.terapia-fecha {
+  font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--muted2); margin-bottom: 20px;
+}
+.terapia-q {
+  margin-bottom: 18px;
+}
+.terapia-q-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px; font-style: italic; color: var(--sand);
+  margin-bottom: 8px; line-height: 1.5;
+}
+.terapia-textarea {
+  width: 100%; min-height: 90px; padding: 14px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--cream);
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  resize: vertical; line-height: 1.6;
+  transition: border-color 0.2s;
+}
+.terapia-textarea:focus {
+  outline: none; border-color: rgba(196,48,106,0.4);
+}
+.terapia-msg {
+  font-size: 13px; min-height: 18px;
+  text-align: center; margin-bottom: 8px;
+  transition: color 0.3s;
+}
+.terapia-hist-card {
+  padding: 16px; border: 1px solid var(--border);
+  border-radius: 10px; background: var(--card);
+  margin-bottom: 8px;
+}
+.terapia-hist-fecha {
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--muted2); margin-bottom: 10px;
+}
+.terapia-hist-item {
+  display: flex; flex-direction: column; gap: 2px;
+  margin-bottom: 8px;
+}
+.terapia-hist-q {
+  font-size: 11px; color: rgba(196,48,106,0.6); letter-spacing: 0.5px;
+}
+.terapia-hist-r {
+  font-size: 13px; color: var(--sand); line-height: 1.5;
+}
+
+/* ── PERFIL ── */
+.perfil-hero {
+  text-align: center; padding: 28px 0 24px;
+}
+.perfil-avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--terra), var(--rose));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 30px; color: #fff; margin: 0 auto 14px;
+  box-shadow: 0 0 24px rgba(196,48,106,0.25);
+}
+.perfil-nombre {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px; font-weight: 300; color: var(--cream);
+  margin-bottom: 4px;
+}
+.perfil-nick {
+  font-size: 12px; color: var(--muted); margin-bottom: 4px;
+}
+.perfil-miembro {
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted2);
+}
+.perfil-section-title {
+  font-size: 10px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--muted2); margin-bottom: 10px;
+}
+
+/* ── NOTIFICACIONES ── */
+.notif-list { display: flex; flex-direction: column; gap: 8px; }
+.notif-item {
+  position: relative; padding: 14px 36px 14px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px; background: var(--card);
+  cursor: pointer; transition: background 0.2s;
+}
+.notif-item:hover { background: var(--card2); }
+.notif-leida { opacity: 0.5; }
+.notif-texto { font-size: 13px; color: var(--cream); line-height: 1.5; }
+.notif-fecha { font-size: 11px; color: var(--muted2); margin-top: 4px; }
+.notif-dot {
+  position: absolute; right: 14px; top: 50%;
+  transform: translateY(-50%);
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--rose);
+}
+
+</style>
+<style>
+.nav-tab-sos {
+  color: var(--rose) !important;
+  border: 1px solid rgba(196,48,106,0.3) !important;
+  border-radius: 4px; margin-left: 4px; letter-spacing: 2px;
+}
+.nav-tab-sos:hover, .nav-tab-sos.active {
+  background: rgba(196,48,106,0.15) !important; color: #fff !important;
+}
+.drawer-sos-link { color: rgba(224,80,138,0.75) !important; }
+.drawer-sos-link:hover { color: var(--rose) !important; }
+
+/* la pantalla SOS NO usa screen-scroll — es fullscreen fija */
+#s-sos {
+  overflow: hidden !important;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 50%, rgba(196,48,106,0.13) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 40% at 10% 10%, rgba(120,20,80,0.07) 0%, transparent 55%),
+    var(--bg);
+}
+
+/* contenedor principal — centrado absoluto, sin scroll */
+.sos-fullscreen {
+  position: absolute;
+  inset: 56px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 32px 24px 48px;
+  gap: 0;
+  background: radial-gradient(ellipse at 50% 20%,
+    rgba(70,90,150,0.10) 0%,
+    rgba(50,70,130,0.05) 50%,
+    transparent 75%);
+  -webkit-overflow-scrolling: touch;
+}
+/* centrar verticalmente cuando no hay scroll */
+.sos-fullscreen::before {
+  content: ''; flex: 1; min-height: 0;
+}
+
+/* título */
+.sos-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(18px, 4.5vw, 28px); font-weight: 300;
+  color: rgba(200,215,240,0.7);
+  letter-spacing: 6px; text-transform: uppercase;
+  margin-bottom: 4px; text-align: center;
+}
+
+/* subtítulo */
+.sos-subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: clamp(13px, 3vw, 15px); line-height: 1.8;
+  color: rgba(180,200,230,0.45); text-align: center;
+  max-width: 280px; margin-bottom: 22px;
+}
+
+/* círculo de respiración */
+.sos-circle-wrap {
+  position: relative;
+  width: clamp(180px, 48vw, 230px);
+  height: clamp(180px, 48vw, 230px);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-bottom: 18px;
+}
+
+/* anillos externos — muy suaves */
+.sos-ring {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 1px solid rgba(140,170,220,0.10);
+  animation: sosPulse 5s ease-in-out infinite;
+}
+.sos-ring:nth-child(2) {
+  inset: -18px; border-color: rgba(140,170,220,0.06);
+  animation-delay: 1s;
+}
+/* tercer anillo extra — añade profundidad */
+.sos-ring:nth-child(3) {
+  inset: -36px; border-color: rgba(140,170,220,0.03);
+  animation-delay: 2s;
+}
+@keyframes sosPulse {
+  0%,100% { opacity: 0.8; transform: scale(1); }
+  50%      { opacity: 0; transform: scale(1.12); }
+}
+
+/* círculo principal — agua quieta */
+#breath-circle {
+  width: 100%; height: 100%; border-radius: 50%;
+  background: radial-gradient(circle at 42% 35%,
+    rgba(160,190,240,0.22),
+    rgba(100,140,210,0.14) 40%,
+    rgba(70,100,180,0.08) 65%,
+    rgba(50,70,140,0.04));
+  border: 1px solid rgba(160,200,240,0.18);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow:
+    0 0 40px rgba(100,140,210,0.12),
+    0 0 80px rgba(100,140,210,0.05),
+    inset 0 0 40px rgba(120,160,230,0.06);
+  transition: transform 4s cubic-bezier(0.4,0,0.2,1),
+              box-shadow 4s ease,
+              background 4s ease;
+  position: relative; z-index: 1;
+}
+
+/* texto dentro del círculo */
+#breath-circle-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: clamp(15px, 4vw, 20px);
+  color: rgba(200,220,255,0.75); letter-spacing: 1px;
+  text-align: center; line-height: 1.3;
+  pointer-events: none;
+}
+
+/* estados de animación — expansión suave */
+.sos-expand {
+  transform: scale(1.22) !important;
+  background: radial-gradient(circle at 42% 35%,
+    rgba(160,200,255,0.28),
+    rgba(110,155,230,0.18) 40%,
+    rgba(80,120,200,0.10) 65%,
+    rgba(60,90,160,0.05)) !important;
+  box-shadow:
+    0 0 60px rgba(120,160,240,0.20),
+    0 0 120px rgba(120,160,240,0.08),
+    inset 0 0 50px rgba(140,180,255,0.10) !important;
+}
+.sos-hold {
+  transform: scale(1.22) !important;
+  background: radial-gradient(circle at 42% 35%,
+    rgba(180,210,255,0.25),
+    rgba(130,170,240,0.16) 40%,
+    rgba(90,130,210,0.09) 65%,
+    rgba(70,100,170,0.04)) !important;
+  box-shadow:
+    0 0 65px rgba(130,170,250,0.22),
+    0 0 130px rgba(130,170,250,0.09),
+    inset 0 0 55px rgba(160,200,255,0.12) !important;
+}
+.sos-contract {
+  transform: scale(0.88) !important;
+  background: radial-gradient(circle at 42% 35%,
+    rgba(100,130,200,0.12),
+    rgba(70,100,170,0.08) 40%,
+    rgba(50,80,150,0.04)) !important;
+  box-shadow:
+    0 0 20px rgba(80,110,190,0.06),
+    inset 0 0 20px rgba(80,110,190,0.04) !important;
+}
+
+/* texto de fase */
+.sos-phase-text {
+  font-size: 9px; letter-spacing: 6px; text-transform: uppercase;
+  color: rgba(160,190,230,0.38);
+  margin-bottom: 10px; min-height: 15px; text-align: center;
+}
+
+/* frase motivadora */
+.sos-phrase {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: clamp(13px, 3.5vw, 16px);
+  color: rgba(180,200,235,0.55); text-align: center;
+  max-width: 260px; line-height: 1.8;
+  min-height: 44px; margin-bottom: 22px;
+  transition: opacity 0.8s ease;
+}
+.sos-phrase.fade { opacity: 0; }
+
+/* botón EMPEZAR — sereno */
+.sos-btn {
+  padding: 13px 40px;
+  background: rgba(100,140,210,0.07);
+  border: 1px solid rgba(140,180,240,0.22);
+  color: rgba(180,210,250,0.70);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px; letter-spacing: 4px; text-transform: uppercase;
+  cursor: pointer; border-radius: 2px;
+  transition: all 0.5s; position: relative; overflow: hidden;
+}
+.sos-btn::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg,
+    rgba(80,120,200,0.15),
+    rgba(120,160,240,0.15));
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.5s ease;
+}
+.sos-btn:hover::before { transform: scaleX(1); }
+.sos-btn:hover { color: rgba(220,235,255,0.90); border-color: rgba(160,200,255,0.35); }
+.sos-btn span { position: relative; z-index: 1; }
+
+/* contador mini (discreto, esquina) */
+.sos-rescue-count {
+  position: absolute; bottom: 16px; right: 20px;
+  font-size: 10px; letter-spacing: 2px; color: var(--muted2);
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════
+   COMUNIDAD — mejoras
+═══════════════════════════════════════ */
+.comunidad-nuevo { margin-bottom: 16px; }
+.comunidad-sort { display: flex; gap: 8px; margin-bottom: 14px; }
+.sort-btn {
+  padding: 7px 18px; background: transparent;
+  border: 1px solid var(--border); color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-size: 11px;
+  letter-spacing: 2px; text-transform: uppercase;
+  cursor: pointer; border-radius: 2px; transition: all 0.25s;
+}
+.sort-btn.active, .sort-btn:hover {
+  border-color: var(--rose); color: var(--cream); background: rgba(196,48,106,0.08);
+}
+.post-meta { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.post-autor {
+  font-family: 'DM Sans', sans-serif; font-size: 11px;
+  letter-spacing: 1px; text-transform: uppercase; color: var(--rose); font-weight: 500;
+}
+.post-fecha { font-size: 10px; color: var(--muted2); letter-spacing: 0.5px; }
+.post-reply-btn {
+  background: transparent; border: none; color: var(--muted); font-size: 12px;
+  cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: color 0.2s;
+}
+.post-reply-btn:hover { color: var(--cream); }
+.post-heart { display: flex; align-items: center; gap: 5px; }
+.post-heart span { font-size: 12px; font-style: normal; }
+.comentarios-wrap {
+  max-height: 0; overflow: hidden; transition: max-height 0.4s ease; margin-top: 0;
+}
+.comentarios-wrap.open { max-height: 600px; margin-top: 12px; }
+.comentario-item {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 10px 12px; margin-bottom: 8px;
+  background: rgba(255,255,255,0.02);
+  border-left: 2px solid var(--border2); border-radius: 0 6px 6px 0;
+}
+.comentario-autor {
+  font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--rose); font-weight: 500;
+}
+.comentario-texto { font-size: 13px; color: var(--cream); line-height: 1.6; }
+.comentario-fecha { font-size: 10px; color: var(--muted2); }
+.comentario-nuevo { display: flex; gap: 8px; margin-top: 8px; }
+.comentario-input {
+  flex: 1; background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border); border-radius: 20px;
+  padding: 9px 16px; color: var(--cream);
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  outline: none; transition: border-color 0.25s;
+}
+.comentario-input:focus { border-color: var(--rose); }
+.comentario-input::placeholder { color: var(--muted2); }
+.comentario-send {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: rgba(196,48,106,0.15); border: 1px solid rgba(196,48,106,0.3);
+  color: var(--rose); font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s; flex-shrink: 0;
+}
+.comentario-send:hover { background: rgba(196,48,106,0.3); color: #fff; }
+
+/* ── SOS — ciclos y reflexión ── */
+.sos-ciclos-row {
+  display: flex; align-items: baseline; gap: 6px;
+  margin-bottom: 6px;
+}
+.sos-ciclos-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px; color: var(--cream); line-height: 1;
+}
+.sos-ciclos-lbl {
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
+}
+.sos-reflexion {
+  max-width: 280px; text-align: center;
+  font-size: 13px; color: rgba(190,210,240,0.75);
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  line-height: 1.8; margin-bottom: 20px;
+  padding: 16px 20px;
+  border: 1px solid rgba(140,170,220,0.15);
+  border-radius: 10px;
+  background: rgba(80,110,180,0.06);
+  animation: riseUp 0.5s ease both;
+}
+
+/* área de escritura post-SOS */
+.sos-escribe-wrap {
+  width: 100%;
+  animation: riseUp 0.6s ease 0.2s both;
+}
+.sos-escribe-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 14px; color: rgba(180,205,240,0.60);
+  text-align: center; margin-bottom: 12px; line-height: 1.6;
+}
+.sos-escribe-textarea {
+  width: 100%; min-height: 100px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(140,170,220,0.15);
+  border-radius: 8px; padding: 14px 16px;
+  color: var(--gold); font-family: 'DM Sans', sans-serif;
+  font-size: 13px; line-height: 1.7; resize: none;
+  outline: none; box-sizing: border-box;
+  transition: border-color 0.3s, background 0.3s;
+  -webkit-appearance: none;
+}
+.sos-escribe-textarea::placeholder { color: rgba(180,200,230,0.28); }
+.sos-escribe-textarea:focus {
+  border-color: rgba(140,170,220,0.28);
+  background: rgba(255,255,255,0.04);
+}
+.sos-escribe-hint {
+  font-size: 11px; color: rgba(160,190,230,0.35);
+  text-align: center; min-height: 18px;
+  margin: 8px 0; letter-spacing: 0.5px; font-style: italic;
+}
+.sos-escribe-btn {
+  width: 100%; margin-top: 8px; padding: 13px;
+  background: rgba(100,140,210,0.08);
+  border: 1px solid rgba(140,180,240,0.20);
+  color: rgba(180,210,250,0.60);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  cursor: pointer; border-radius: 2px;
+  transition: all 0.4s;
+}
+.sos-escribe-btn:hover {
+  background: rgba(100,140,210,0.14);
+  color: rgba(200,225,255,0.80);
+}
+
+/* ── RITUAL — BOTÓN RESPIRACIÓN ── */
+.ritual-breath-btn {
+  display: inline-block; margin-top: 12px;
+  padding: 10px 28px;
+  background: rgba(196,48,106,0.07);
+  border: 1px solid rgba(196,48,106,0.30);
+  color: var(--rose);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
+  cursor: pointer; border-radius: 2px;
+  transition: all 0.3s; position: relative; overflow: hidden;
+}
+.ritual-breath-btn::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, var(--terra), var(--rose));
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.4s ease;
+}
+.ritual-breath-btn:hover::before { transform: scaleX(1); }
+.ritual-breath-btn:hover { color: #fff; }
+.ritual-breath-btn span { position: relative; z-index: 1; }
+.ritual-breath-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* orbe ritual — SVG anillo de progreso */
+.ritual-ring-wrap {
+  position: relative;
+  width: 120px; height: 120px;
+  margin: 0 auto 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.ritual-ring-svg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  transform: rotate(-90deg);
+}
+.ritual-ring-bg {
+  fill: none;
+  stroke: rgba(196,48,106,0.10);
+  stroke-width: 3;
+}
+.ritual-ring-prog {
+  fill: none;
+  stroke: url(#ritualGradient);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 327; /* 2π×52 */
+  stroke-dashoffset: 327;
+  transition: stroke-dashoffset 0.5s ease;
+}
+.ritual-orb-inner {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%,
+    rgba(196,48,106,0.30), rgba(120,20,80,0.12));
+  border: 1px solid rgba(196,48,106,0.25);
+  transition: transform 4s cubic-bezier(0.4,0,0.2,1),
+              box-shadow 4s ease;
+  box-shadow: 0 0 12px rgba(196,48,106,0.10);
+}
+.ritual-orb-expand {
+  transform: scale(1.18) !important;
+  box-shadow: 0 0 28px rgba(196,48,106,0.25) !important;
+}
+.ritual-orb-contract {
+  transform: scale(0.78) !important;
+  box-shadow: 0 0 4px rgba(196,48,106,0.05) !important;
+}
+
+/* ── AFIRMACIÓN BLOQUEADA / DESBLOQUEADA ── */
+.afirmacion-lock {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 20px; opacity: 0.5;
+}
+.afirmacion-lock-icon {
+  font-size: 22px; color: var(--muted); margin-bottom: 8px;
+  animation: pulse 2.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity: 0.4; } 50% { opacity: 0.9; }
+}
+.afirmacion-lock-txt {
+  font-size: 12px; color: var(--muted2); text-align: center;
+  line-height: 1.6; letter-spacing: 0.5px;
+}
+.afirmacion-reveal { animation: riseUp 0.6s ease both; }
+@keyframes afirmacionUnlock {
+  0%   { opacity: 0; transform: scale(0.92); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.afirmacion-unlock-anim { animation: afirmacionUnlock 0.7s ease both; }
+
+/* ══════════════════════════════════════
+   PREMIUM
+══════════════════════════════════════ */
+.premium-hero {
+  text-align: center; padding: 8px 0 24px;
+}
+.premium-crown {
+  font-size: 32px; margin-bottom: 12px; display: block;
+  animation: pulse 2.5s ease-in-out infinite;
+}
+.premium-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px; font-weight: 300; color: var(--cream);
+  letter-spacing: 4px; text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.premium-sub {
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--rose); margin-bottom: 20px;
+}
+.premium-quote {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px; font-style: italic; color: var(--muted);
+  line-height: 1.8; margin-bottom: 28px;
+  border-left: 2px solid var(--border2); padding-left: 16px;
+}
+.premium-benefits {
+  background: rgba(196,48,106,0.05);
+  border: 1px solid var(--border2); border-radius: 10px;
+  padding: 18px 20px; margin-bottom: 24px;
+}
+.premium-benefit {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: var(--cream);
+  line-height: 1.6; margin-bottom: 10px;
+}
+.premium-benefit:last-child { margin-bottom: 0; }
+.premium-benefit-icon { color: var(--rose); flex-shrink: 0; font-size: 14px; }
+.premium-price-row {
+  display: flex; gap: 12px; margin-bottom: 20px;
+}
+.premium-price-card {
+  flex: 1; border: 1px solid var(--border); border-radius: 8px;
+  padding: 14px 12px; text-align: center;
+  background: rgba(255,255,255,0.02);
+  transition: border-color 0.25s;
+}
+.premium-price-card.featured { border-color: var(--rose); background: rgba(196,48,106,0.06); }
+.premium-price-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; color: var(--cream); display: block; margin-bottom: 2px;
+}
+.premium-price-lbl {
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
+}
+.premium-price-save {
+  font-size: 9px; color: var(--rose); letter-spacing: 1px; margin-top: 4px; display: block;
+}
+.btn-premium {
+  width: 100%; padding: 15px;
+  background: linear-gradient(135deg, var(--terra), var(--rose));
+  border: none; border-radius: 6px; color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  cursor: pointer; margin-bottom: 10px;
+  transition: opacity 0.3s;
+}
+.btn-premium:hover { opacity: 0.88; }
+.btn-premium-soft {
+  width: 100%; padding: 13px;
+  background: transparent;
+  border: 1px solid var(--border2); border-radius: 6px; color: var(--rose);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  cursor: pointer; margin-bottom: 20px;
+  transition: all 0.3s;
+}
+.btn-premium-soft:hover { background: rgba(196,48,106,0.08); }
+.premium-nota {
+  font-size: 10px; color: var(--muted2); text-align: center;
+  letter-spacing: 0.5px; line-height: 1.6;
+}
+
+/* PROGRAMAS */
+.programa-card {
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 18px; margin-bottom: 14px;
+  background: rgba(255,255,255,0.02);
+  transition: border-color 0.25s, background 0.25s;
+  cursor: pointer;
+}
+.programa-card:hover { border-color: var(--border2); background: rgba(196,48,106,0.04); }
+.programa-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.programa-icon { font-size: 22px; }
+.programa-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px; color: var(--cream); font-weight: 400;
+}
+.programa-desc { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 10px; }
+.programa-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.programa-tag {
+  font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--rose); border: 1px solid var(--border2);
+  padding: 3px 8px; border-radius: 20px;
+}
+.programa-lock {
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted2); margin-top: 8px; display: flex; align-items: center; gap: 6px;
+}
+
+/* HÁBITO DIARIO — badge */
+.habito-toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, rgba(8,11,20,0.97), rgba(20,10,30,0.97));
+  border: 1px solid var(--border2); border-radius: 12px;
+  padding: 14px 20px; max-width: 300px; width: 90%;
+  text-align: center; z-index: 9999;
+  font-size: 13px; color: var(--gold); line-height: 1.7;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.5s ease;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.habito-toast.show { opacity: 1; pointer-events: auto; }
+.habito-toast-icon { font-size: 20px; display: block; margin-bottom: 6px; }
+
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+<!-- SVG defs reutilizables -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="ritualGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#C4306A"/>
+      <stop offset="50%"  stop-color="#E0508A"/>
+      <stop offset="100%" stop-color="#F0C8D8"/>
+    </linearGradient>
+  </defs>
+</svg>
+<div class="toast" id="toast"></div>
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- ══ NAV ══ -->
+<nav>
+  <div class="nav-logo">Inquebratable</div>
+  <div class="nav-tabs" id="navTabs">
+    <button class="nav-tab active"  onclick="go('inicio')">Inicio</button>
+    <button class="nav-tab"        onclick="go('historia')">Historia</button>
+    <button class="nav-tab"        onclick="go('test')">Test</button>
+    <button class="nav-tab"        onclick="go('niveles')">Niveles</button>
+    <button class="nav-tab"        onclick="go('refugio')">Refugio</button>
+    <button class="nav-tab"        onclick="go('ritual')">Ritual</button>
+    <button class="nav-tab"        onclick="go('menu')">Cuenta</button>
+    <button class="nav-tab nav-tab-sos" onclick="go('sos')">SOS</button>
+    <button class="nav-tab"        onclick="go('progreso')">Progreso</button>
+    <button class="nav-tab"        onclick="irATerapia()">Terapia</button>
+  </div>
+  <button class="nav-burger" id="navBurger" onclick="toggleDrawer()">
+    <span></span><span></span><span></span>
+  </button>
+  <button class="nav-notif-btn" id="navNotifBtn" onclick="go('notif')" title="Notificaciones">
+    <span class="nav-notif-icon">🔔</span>
+    <span class="nav-notif-badge" id="notifBadge" style="display:none">0</span>
+  </button>
+</nav>
+
+<!-- ══ DRAWER MÓVIL ══ -->
+<div class="nav-drawer" id="navDrawer">
+
+  <div class="drawer-section-label">Navegar</div>
+
+  <button class="nav-drawer-link" data-num="01" data-icon="⚪️"
+    onclick="go('inicio');closeDrawer()">Inicio</button>
+
+  <button class="nav-drawer-link" data-num="02" data-icon="⚪️"
+    onclick="go('historia');closeDrawer()">Mi historia</button>
+
+  <div class="drawer-section-divider"></div>
+  <div class="drawer-section-label">Descubrirte</div>
+
+  <button class="nav-drawer-link" data-num="03" data-icon="⚪️"
+    onclick="go('test');closeDrawer()">Test de niveles</button>
+
+  <button class="nav-drawer-link" data-num="04" data-icon="⚪️"
+    onclick="go('niveles');closeDrawer()">Camino de niveles</button>
+
+  <div class="drawer-section-divider"></div>
+  <div class="drawer-section-label">Tu espacio</div>
+
+  <button class="nav-drawer-link" data-num="05" data-icon="⚪️"
+    onclick="go('refugio');closeDrawer()">El refugio</button>
+
+  <button class="nav-drawer-link" data-num="06" data-icon="⚪️"
+    onclick="go('ritual');closeDrawer()">Ritual diario</button>
+
+  <button class="nav-drawer-link" data-num="07" data-icon="⚪️"
+    onclick="go('menu');closeDrawer()">Mi cuenta</button>
+
+  <div class="drawer-section-divider"></div>
+
+  <button class="nav-drawer-link drawer-sos-link" data-icon="🆘"
+    onclick="go('sos');closeDrawer()">Modo SOS</button>
+
+  <div class="drawer-section-divider"></div>
+  <div class="drawer-section-label">Crecer</div>
+
+  <button class="nav-drawer-link" data-num="08" data-icon="⚪️"
+    onclick="go('progreso');closeDrawer()">Mi progreso</button>
+
+  <button class="nav-drawer-link" data-num="09" data-icon="⚪️"
+    onclick="irATerapia();closeDrawer()">Modo terapia</button>
+
+  <button class="nav-drawer-link" data-num="10" data-icon="⚪️"
+    onclick="irAProgramas();closeDrawer()">Programas</button>
+
+  <div class="drawer-section-divider"></div>
+
+  <button class="nav-drawer-link" data-icon="✦"
+    onclick="go('premium');closeDrawer()"
+    style="color:var(--rose)">Premium</button>
+
+</div>
+
+  <button class="nav-drawer-link" data-num="11" data-icon="⚪️"
+    onclick="go('notif');closeDrawer()">Notificaciones</button>
+
+</div>
+
+<!-- ══════════════════════════════════
+     PANTALLA 1 — INICIO
+══════════════════════════════════ -->
+<div class="screen active" id="s-inicio">
+  <div class="inicio-ornament"></div>
+  <p class="inicio-eyebrow">Silvia Beltrán</p>
+  <h1 class="inicio-title">INQUEBRATABLE</h1>
+  <p class="inicio-frase">
+    "Un día dejé de esperar<br>
+    que alguien viniera a salvarme…<br>
+    y empecé a salvarme yo."
+  </p>
+  <div class="inicio-divider"></div>
+  <button class="btn-refugio" onclick="go('historia')">
+    <span>Entrar al refugio</span>
+  </button>
+  <p class="inicio-autor">Un lugar seguro para reconstruirte</p>
+</div>
+
+<!-- ══════════════════════════════════
+     PANTALLA 2 — HISTORIA
+══════════════════════════════════ -->
+<div class="screen" id="s-historia">
+  <div class="screen-scroll">
+    <div class="historia-wrap" style="max-width:580px;width:100%;margin:28px auto 0">
+      <div class="screen-label">Mi historia</div>
+      <h2 class="historia-titulo">
+        No nací<br><em>inquebratable.</em>
+      </h2>
+      <p class="historia-p">Me convertí en madre muy joven. Demasiado joven para saber quién era yo. Sin darme cuenta, construí mi vida entera alrededor de los demás: sus necesidades, sus emociones, sus expectativas.</p>
+      <p class="historia-p">Durante años viví <strong>esperando</strong>. Esperando que alguien me viera de verdad. Que alguien viniera a decirme que todo iba a estar bien. Que alguien me salvara.</p>
+      <p class="historia-p">Pero nadie vino.</p>
+      <p class="historia-p">Y en esa soledad que duele tanto, encontré algo que nunca había buscado: <strong>a mí misma</strong>. Descubrí que la única persona capaz de salvarme era yo. Que mi fuerza no dependía de nadie más.</p>
+      <p class="historia-p">Aprendí que romperse no es el final. Es el principio. Las grietas dejan entrar la luz.</p>
+      <div class="historia-firma">Así nació INQUEBRATABLE.</div>
+      <button class="btn-soft" onclick="go('test')">Descubrir en qué fase estás</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PANTALLA 3 — TEST
+══════════════════════════════════ -->
+<div class="screen" id="s-test">
+  <div class="screen-scroll">
+    <div class="test-wrap">
+      <div class="screen-label">Test de niveles</div>
+      <div class="test-progress-track">
+        <div class="test-progress-fill" id="testBar" style="width:0%"></div>
+      </div>
+
+      <!-- preguntas -->
+      <div id="test-questions">
+        <div class="test-q-label" id="qNum">Pregunta 1 de 6</div>
+        <div class="test-question" id="qText"></div>
+        <div class="test-options" id="qOptions"></div>
+      </div>
+
+      <!-- resultado -->
+      <div class="test-result" id="test-result">
+        <div class="result-badge" id="r-badge">Nivel</div>
+        <div class="result-name" id="r-name"></div>
+        <div class="result-bar-track">
+          <div class="result-bar-fill" id="r-bar" style="width:0%"></div>
+        </div>
+        <div class="result-desc" id="r-desc"></div>
+        <div class="result-motivador" id="r-msg"></div>
+        <button class="btn-soft" onclick="go('niveles')">Ver el camino completo</button>
+        <br><br>
+        <button class="btn-retry" onclick="resetTest()">Repetir el test</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PANTALLA 4 — NIVELES
+══════════════════════════════════ -->
+<div class="screen" id="s-niveles">
+  <div class="screen-scroll">
+    <div class="niveles-wrap">
+      <div class="screen-label">Camino de transformación</div>
+      <h2 class="niveles-intro-title">
+        Cuatro fases.<br><em>Un solo camino.</em>
+      </h2>
+      <p class="niveles-intro-sub">Cada mujer entra por una grieta y emerge como algo nuevo. Aquí están las etapas del proceso de reconstrucción.</p>
+      <div id="nivelesCards"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PANTALLA 5 — REFUGIO
+══════════════════════════════════ -->
+<div class="screen" id="s-refugio">
+  <div class="screen-scroll">
+    <div class="refugio-wrap">
+      <div class="screen-label">Comunidad</div>
+      <p class="refugio-intro">
+        "Aquí puedes hablar sin miedo.<br>Este es un espacio sin juicios."
+      </p>
+
+      <!-- pregunta del día -->
+      <div class="pregunta-dia-card" id="pregunta-dia-card">
+        <div class="pregunta-dia-label">✦ Pregunta del día</div>
+        <div class="pregunta-dia-texto" id="pregunta-dia-texto"></div>
+        <button class="pregunta-dia-btn" onclick="responderPregunta()">Responder esta pregunta</button>
+      </div>
+
+      <!-- nueva publicación -->
+      <div class="comunidad-nuevo">
+        <textarea class="refugio-textarea" id="refugio-input"
+          placeholder="Escribe algo que sientas hoy…"></textarea>
+        <button class="btn-publicar" onclick="publicarPost()">Compartir aquí</button>
+      </div>
+
+      <!-- ordenar -->
+      <div class="comunidad-sort">
+        <button class="sort-btn active" id="sort-recientes" onclick="setSortPosts('recientes')">Recientes</button>
+        <button class="sort-btn" id="sort-populares" onclick="setSortPosts('populares')">Populares</button>
+      </div>
+
+      <div class="refugio-divider"></div>
+      <div class="refugio-posts" id="refugio-posts">
+        <div class="post-empty">Las voces del refugio aparecerán aquí…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PANTALLA 6 — RITUAL
+══════════════════════════════════ -->
+<div class="screen" id="s-ritual">
+  <div class="screen-scroll">
+    <div class="ritual-wrap">
+      <div class="screen-label">Ritual diario</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:28px">
+        Unos minutos sólo para ti. Sin prisa. Sin perfección.
+      </p>
+
+      <!-- paso 1: respirar -->
+      <div class="ritual-step" id="step1">
+        <div class="step-head" onclick="toggleStep(1)">
+          <div class="step-num">I</div>
+          <div class="step-check" id="check1">✓</div>
+          <div class="step-title">Respira</div>
+        </div>
+        <div class="step-desc">Tres respiraciones guiadas. Suelta el ruido de hoy.</div>
+        <div class="ritual-breath" id="breath1">
+          <!-- SVG anillo de progreso -->
+          <div class="ritual-ring-wrap">
+            <svg class="ritual-ring-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+              <circle class="ritual-ring-bg" cx="60" cy="60" r="52"/>
+              <circle class="ritual-ring-prog" id="ritual-ring-prog" cx="60" cy="60" r="52"/>
+            </svg>
+            <div class="ritual-orb-inner" id="ritual-orb"></div>
+          </div>
+          <div class="breath-label" id="ritual-breath-lbl">Inhala… exhala…</div>
+          <button class="ritual-breath-btn" id="ritual-breath-btn" onclick="iniciarRespiracionRitual(event)">
+            <span>Comenzar respiración</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- paso 2: escribir -->
+      <div class="ritual-step" id="step2" onclick="toggleStep(2)">
+        <div class="step-head">
+          <div class="step-num">II</div>
+          <div class="step-check" id="check2">✓</div>
+          <div class="step-title">Escribe cómo te sientes</div>
+        </div>
+        <div class="step-desc">Sin filtros. Sin correcciones. Lo que salga.</div>
+        <textarea class="ritual-writing" id="ritual-input"
+          placeholder="Hoy me siento…"
+          onclick="event.stopPropagation()"
+          oninput="checkRitualAfirmacion()"></textarea>
+        <button class="ritual-breath-btn" id="ritual-afirmar-btn"
+          style="margin-top:10px;display:none"
+          onclick="desbloquearAfirmacionConTexto(event)">
+          <span>Recibir mi afirmación</span>
+        </button>
+      </div>
+
+      <div class="afirmacion-card" id="afirmacion-card">
+        <div class="afirmacion-lock" id="afirmacion-lock">
+          <div class="afirmacion-lock-icon">◎</div>
+          <div class="afirmacion-lock-txt">Completa la respiración y escribe cómo te sientes para desbloquear tu afirmación</div>
+        </div>
+        <div class="afirmacion-reveal" id="afirmacion-reveal" style="display:none">
+          <div class="afirmacion-eyebrow">Afirmación de hoy</div>
+          <div class="afirmacion-text" id="afirmacion-text">Hoy me elijo a mí.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PANTALLA 7 — CUENTA / PERFIL FUSIONADO
+══════════════════════════════════ -->
+<div class="screen" id="s-menu">
+  <div class="screen-scroll">
+    <div class="menu-inner">
+
+      <!-- VISTA: SIN SESIÓN -->
+      <div id="menu-noauth">
+        <div class="screen-label">Mi cuenta</div>
+        <p class="new-intro">Únete para guardar tu progreso y participar en la comunidad.</p>
+
+        <div class="menu-tabs" style="margin-bottom:20px">
+          <button class="menu-tab-btn active" onclick="switchMenuTab('registro')">Crear cuenta</button>
+          <button class="menu-tab-btn"        onclick="switchMenuTab('login')">Entrar</button>
+          <button class="menu-tab-btn"        onclick="switchMenuTab('contacto')">Contacto</button>
+        </div>
+
+        <!-- REGISTRO -->
+        <div class="menu-panel active" id="mp-registro">
+          <div class="menu-field">
+            <label>Nickname</label>
+            <input type="text" id="reg-nick" placeholder="Tu nombre en la comunidad" maxlength="20"/>
+          </div>
+          <div class="menu-field">
+            <label>Email</label>
+            <input type="email" id="reg-email" placeholder="tu@email.com"/>
+          </div>
+          <div class="menu-field">
+            <label>Contraseña</label>
+            <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres"/>
+          </div>
+          <button class="btn-gold" onclick="handleRegister()" style="width:100%">
+            <span>Crear cuenta</span>
+          </button>
+          <div class="menu-msg" id="reg-msg"></div>
+        </div>
+
+        <!-- LOGIN -->
+        <div class="menu-panel" id="mp-login">
+          <div class="menu-field">
+            <label>Email</label>
+            <input type="email" id="log-email" placeholder="tu@email.com"/>
+          </div>
+          <div class="menu-field">
+            <label>Contraseña</label>
+            <input type="password" id="log-pass" placeholder="Tu contraseña"/>
+          </div>
+          <button class="btn-gold" onclick="handleLogin()" style="width:100%">
+            <span>Iniciar sesión</span>
+          </button>
+          <div class="menu-msg" id="log-msg"></div>
+        </div>
+
+        <!-- CONTACTO -->
+        <div class="menu-panel" id="mp-contacto">
+          <p style="font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:20px">
+            ¿Quieres ponerte en contacto con Silvia? Cuéntame lo que necesitas.
+          </p>
+          <div class="menu-field">
+            <label>Tu nombre</label>
+            <input type="text" id="contact-name" placeholder="¿Cómo te llamas?"/>
+          </div>
+          <div class="menu-field">
+            <label>Email</label>
+            <input type="email" id="contact-email" placeholder="Para poderte responder"/>
+          </div>
+          <div class="contact-area">
+            <label>Mensaje</label>
+            <textarea id="contact-msg" placeholder="Cuéntame algo…"></textarea>
+          </div>
+          <button class="btn-gold" onclick="handleContact()" style="width:100%">
+            <span>Enviar mensaje</span>
+          </button>
+          <div class="menu-msg" id="contact-feedback"></div>
+        </div>
+      </div>
+
+      <!-- VISTA: CON SESIÓN — PERFIL COMPLETO -->
+      <div id="menu-auth" style="display:none">
+        <div class="screen-label">Mi perfil</div>
+
+        <!-- avatar + datos -->
+        <div class="perfil-hero" style="margin-bottom:20px">
+          <div class="perfil-avatar" id="mp-avatar">?</div>
+          <div class="perfil-nombre" id="mp-nombre">—</div>
+          <div class="perfil-nick" id="mp-email-display">—</div>
+          <div class="perfil-miembro" id="mp-miembro"></div>
+        </div>
+
+        <!-- stats -->
+        <div class="progreso-stats-row" style="margin-bottom:20px">
+          <div class="progreso-stat">
+            <div class="progreso-stat-num" id="mp-dias">0</div>
+            <div class="progreso-stat-lbl">días fuertes</div>
+          </div>
+          <div class="progreso-stat">
+            <div class="progreso-stat-num" id="mp-posts">0</div>
+            <div class="progreso-stat-lbl">publicaciones</div>
+          </div>
+          <div class="progreso-stat">
+            <div class="progreso-stat-num" id="mp-nivel">—</div>
+            <div class="progreso-stat-lbl">nivel</div>
+          </div>
+        </div>
+
+        <!-- fecha de registro -->
+        <div class="perfil-section-title" style="margin-bottom:8px">Miembro desde</div>
+        <div class="hist-item" style="margin-bottom:20px">
+          <span class="hist-dot">◎</span>
+          <span class="hist-fecha" id="mp-fecha-registro">—</span>
+        </div>
+
+        <!-- mensaje personal -->
+        <div class="perfil-section-title">Tu mensaje personal</div>
+        <textarea class="terapia-textarea" id="mp-bio"
+          placeholder="Escribe algo sobre ti…" style="min-height:72px;margin-bottom:12px"></textarea>
+        <button class="btn-cta" onclick="guardarBioMenu()" style="width:100%;margin-bottom:16px">
+          <span>Guardar mensaje</span>
+        </button>
+        <div class="terapia-msg" id="mp-bio-msg"></div>
+
+        <div style="margin-top:8px">
+          <button class="btn-gold" onclick="handleLogout()" style="width:100%">
+            <span>Cerrar sesión</span>
+          </button>
+        </div>
+
+        <!-- contacto incluso con sesión -->
+        <div style="margin-top:28px">
+          <div class="perfil-section-title" style="margin-bottom:12px">Contactar con Silvia</div>
+          <div class="menu-field">
+            <label>Email de respuesta</label>
+            <input type="email" id="contact-email2" placeholder="Para poderte responder"/>
+          </div>
+          <div class="contact-area">
+            <label>Mensaje</label>
+            <textarea id="contact-msg2" placeholder="Cuéntame algo…"></textarea>
+          </div>
+          <button class="btn-gold" onclick="handleContact2()" style="width:100%">
+            <span>Enviar mensaje</span>
+          </button>
+          <div class="menu-msg" id="contact-feedback2"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PANTALLA SOS — fullscreen, sin scroll
+══════════════════════════════════ -->
+<div class="screen" id="s-sos">
+  <div class="sos-fullscreen">
+
+    <!-- TÍTULO — suave, no alarmante -->
+    <h2 class="sos-title">Estoy aquí contigo</h2>
+    <p class="sos-subtitle">No tienes que hacer nada.<br>Solo respira. Un momento a la vez.</p>
+
+    <!-- CICLOS — discreto -->
+    <div class="sos-ciclos-row" id="sos-ciclos-row" style="display:none">
+      <span class="sos-ciclos-num" id="sos-ciclos-num">0</span>
+      <span class="sos-ciclos-lbl">respiraciones</span>
+    </div>
+
+    <!-- CÍRCULO -->
+    <div class="sos-circle-wrap">
+      <div class="sos-ring"></div>
+      <div class="sos-ring"></div>
+      <div class="sos-ring"></div>
+      <div id="breath-circle">
+        <span id="breath-circle-text">✦</span>
+      </div>
+    </div>
+
+    <!-- FASE -->
+    <div class="sos-phase-text" id="sos-phase-label"> </div>
+
+    <!-- FRASE -->
+    <div class="sos-phrase" id="sos-phrase">Estás a salvo en este momento.</div>
+
+    <!-- BOTONES -->
+    <button class="sos-btn" id="sos-start-btn" onclick="startSOSBreathing()">
+      <span>Respirar contigo</span>
+    </button>
+    <button class="sos-btn sos-btn-stop" id="sos-stop-btn"
+      style="display:none;border-color:rgba(160,200,180,0.22);color:rgba(160,210,185,0.60)"
+      onclick="sosMejor()">
+      <span>Ya estoy mejor</span>
+    </button>
+
+    <!-- SECCIÓN POST-SESIÓN: reflexión + escritura -->
+    <div id="sos-post" style="display:none;width:100%;max-width:320px;margin-top:8px">
+
+      <!-- reflexión empática -->
+      <div class="sos-reflexion" id="sos-reflexion"></div>
+
+      <!-- espacio de escritura -->
+      <div class="sos-escribe-wrap" id="sos-escribe-wrap">
+        <div class="sos-escribe-label">¿Qué está pasando en ti ahora mismo?</div>
+        <textarea class="sos-escribe-textarea" id="sos-textarea"
+          placeholder="No hay respuestas correctas. Escribe lo que salga…"></textarea>
+        <div class="sos-escribe-hint" id="sos-escribe-hint"></div>
+        <button class="sos-escribe-btn" onclick="guardarEscrituraSOS()">
+          <span>Guardar y soltar</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- contador discreto -->
+    <div class="sos-rescue-count" id="sos-rescue-label"></div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PANTALLA — PROGRESO / RECAÍDAS
+══════════════════════════════════ -->
+<div class="screen" id="s-progreso">
+  <div class="screen-scroll">
+    <div class="new-wrap">
+      <div class="screen-label">Mi progreso</div>
+
+      <!-- racha principal -->
+      <div class="progreso-racha-card" id="progreso-racha-card">
+        <div class="progreso-racha-num" id="progreso-dias">0</div>
+        <div class="progreso-racha-label">días fuertes consecutivos</div>
+        <div class="progreso-racha-sub" id="progreso-desde">—</div>
+      </div>
+
+      <!-- stats fila -->
+      <div class="progreso-stats-row">
+        <div class="progreso-stat">
+          <div class="progreso-stat-num" id="progreso-total-dias">0</div>
+          <div class="progreso-stat-lbl">días totales</div>
+        </div>
+        <div class="progreso-stat">
+          <div class="progreso-stat-num" id="progreso-recaidas">0</div>
+          <div class="progreso-stat-lbl">recaídas registradas</div>
+        </div>
+        <div class="progreso-stat">
+          <div class="progreso-stat-num" id="progreso-racha-max">0</div>
+          <div class="progreso-stat-lbl">mejor racha</div>
+        </div>
+      </div>
+
+      <!-- botón recaída -->
+      <button class="btn-recaida" onclick="registrarRecaida()">
+        <span>He tenido una recaída</span>
+      </button>
+      <div class="recaida-apoyo" id="recaida-apoyo" style="display:none"></div>
+
+      <!-- historial -->
+      <div class="progreso-hist-title">Historial</div>
+      <div class="progreso-hist" id="progreso-hist">
+        <div class="hist-empty">Tu historial aparecerá aquí.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PANTALLA — MODO TERAPIA
+══════════════════════════════════ -->
+<div class="screen" id="s-terapia">
+  <div class="screen-scroll">
+    <div class="new-wrap">
+      <div class="screen-label">Modo terapia</div>
+      <p class="new-intro">Un espacio para conocerte. Responde con honestidad, sin juicios.</p>
+
+      <div class="terapia-fecha" id="terapia-fecha"></div>
+
+      <!-- preguntas de reflexión -->
+      <div class="terapia-q" id="tq-1">
+        <div class="terapia-q-label">¿Qué sentiste hoy?</div>
+        <textarea class="terapia-textarea" id="ta-1" placeholder="Escribe libremente…"></textarea>
+      </div>
+      <div class="terapia-q" id="tq-2">
+        <div class="terapia-q-label">¿Qué límite lograste poner?</div>
+        <textarea class="terapia-textarea" id="ta-2" placeholder="Aunque sea pequeño…"></textarea>
+      </div>
+      <div class="terapia-q" id="tq-3">
+        <div class="terapia-q-label">¿Qué aprendiste sobre ti hoy?</div>
+        <textarea class="terapia-textarea" id="ta-3" placeholder="Una observación sincera…"></textarea>
+      </div>
+      <div class="terapia-q" id="tq-4">
+        <div class="terapia-q-label">¿Qué necesitas soltar?</div>
+        <textarea class="terapia-textarea" id="ta-4" placeholder="Nómbralo para liberarlo…"></textarea>
+      </div>
+      <div class="terapia-q" id="tq-5">
+        <div class="terapia-q-label">¿De qué te sientes orgullosa hoy?</div>
+        <textarea class="terapia-textarea" id="ta-5" placeholder="Reconoce tu avance…"></textarea>
+      </div>
+
+      <button class="btn-cta" onclick="guardarTerapia()" style="width:100%;margin-bottom:16px">
+        <span>Guardar reflexión</span>
+      </button>
+      <div class="terapia-msg" id="terapia-msg"></div>
+
+      <!-- entradas anteriores -->
+      <div class="progreso-hist-title" style="margin-top:28px">Entradas anteriores</div>
+      <div class="terapia-hist" id="terapia-hist">
+        <div class="hist-empty">Tus reflexiones guardadas aparecerán aquí.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PANTALLA — PERFIL
+══════════════════════════════════ -->
+<div class="screen" id="s-perfil">
+  <div class="screen-scroll">
+    <div class="new-wrap">
+      <div class="screen-label">Mi perfil</div>
+
+      <!-- avatar + nombre -->
+      <div class="perfil-hero">
+        <div class="perfil-avatar" id="perfil-avatar">?</div>
+        <div class="perfil-nombre" id="perfil-nombre">—</div>
+        <div class="perfil-nick" id="perfil-nick">—</div>
+        <div class="perfil-miembro" id="perfil-miembro"></div>
+      </div>
+
+      <!-- stats -->
+      <div class="progreso-stats-row" style="margin-bottom:20px">
+        <div class="progreso-stat">
+          <div class="progreso-stat-num" id="perfil-dias">0</div>
+          <div class="progreso-stat-lbl">días fuertes</div>
+        </div>
+        <div class="progreso-stat">
+          <div class="progreso-stat-num" id="perfil-posts">0</div>
+          <div class="progreso-stat-lbl">publicaciones</div>
+        </div>
+        <div class="progreso-stat">
+          <div class="progreso-stat-num" id="perfil-nivel">—</div>
+          <div class="progreso-stat-lbl">nivel</div>
+        </div>
+      </div>
+
+      <!-- mensaje personal -->
+      <div class="perfil-section-title">Tu mensaje personal</div>
+      <textarea class="terapia-textarea" id="perfil-bio"
+        placeholder="Escribe algo sobre ti…" style="min-height:80px"></textarea>
+      <button class="btn-cta" onclick="guardarPerfil()" style="width:100%;margin-bottom:24px">
+        <span>Guardar perfil</span>
+      </button>
+      <div class="terapia-msg" id="perfil-msg"></div>
+
+      <!-- historial SOS -->
+      <div class="perfil-section-title" style="margin-top:20px">Historial SOS</div>
+      <div id="perfil-sos-hist" style="margin-top:8px">
+        <div class="hist-empty">Tus sesiones SOS aparecerán aquí.</div>
+      </div>
+
+      <!-- no logueado -->
+      <div id="perfil-noauth" style="display:none">
+        <p style="color:var(--muted);font-size:14px;text-align:center;line-height:1.8;margin-top:24px">
+          Necesitas una cuenta para ver tu perfil.<br>
+          <button class="btn-soft" onclick="go('menu')" style="margin-top:14px">Crear cuenta</button>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PANTALLA — NOTIFICACIONES
+══════════════════════════════════ -->
+<div class="screen" id="s-notif">
+  <div class="screen-scroll">
+    <div class="new-wrap">
+      <div class="screen-label">Notificaciones</div>
+      <div style="display:flex;gap:10px;margin-bottom:20px">
+        <button class="btn-soft" onclick="marcarTodasLeidas()" style="font-size:11px;padding:8px 16px">
+          Marcar todas como leídas
+        </button>
+      </div>
+      <div class="notif-list" id="notif-list">
+        <div class="hist-empty">No tienes notificaciones todavía.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     JAVASCRIPT — toda la lógica intacta
+══════════════════════════════════ -->
+<script>
+// ─────────────────────────────────────
+// PARTÍCULAS CÁLIDAS
+// ─────────────────────────────────────
+(function(){
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // partículas más suaves, tamaño mayor, muy lentas
+  for(let i=0;i<40;i++){
+    particles.push({
+      x:  Math.random() * 1400,
+      y:  Math.random() * 900,
+      r:  Math.random() * 1.4 + 0.3,
+      vx: (Math.random() - 0.5) * 0.12,
+      vy: (Math.random() - 0.5) * 0.12,
+      o:  Math.random() * 0.22 + 0.04
+    });
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if(p.x < 0) p.x = W; if(p.x > W) p.x = 0;
+      if(p.y < 0) p.y = H; if(p.y > H) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(224,80,138,${p.o})`;
+      ctx.fill();
+    });
+    // conexiones muy sutiles
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const d  = Math.sqrt(dx*dx + dy*dy);
+        if(d < 90){
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(196,48,106,${0.04*(1-d/90)})`;
+          ctx.lineWidth = 0.5;
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ─────────────────────────────────────
+// NAVEGACIÓN
+// ─────────────────────────────────────
+let currentScreen = 'inicio';
+const screens = ['inicio','historia','test','niveles','refugio','ritual','menu','sos','progreso','terapia','notif','premium','programas'];
+
+// ═══════════════════════════════════════
+// OBJETO USER CENTRALIZADO
+// ═══════════════════════════════════════
+const user = {
+  get name(){
+    return JSON.parse(localStorage.getItem('inq-session') || '{}').nick || '';
+  },
+  get premium(){
+    const sess = JSON.parse(localStorage.getItem('inq-session') || '{}');
+    if(sess.premium) return true;
+    const trial = localStorage.getItem('inq-premium-trial');
+    if(trial && new Date() < new Date(trial)) return true;
+    return false;
+  },
+  set premium(val){
+    const sess = JSON.parse(localStorage.getItem('inq-session') || '{}');
+    sess.premium = val;
+    localStorage.setItem('inq-session', JSON.stringify(sess));
+    if(val){
+      const exp = new Date();
+      exp.setDate(exp.getDate() + 7);
+      localStorage.setItem('inq-premium-trial', exp.toISOString());
+    }
+  }
+};
+
+// Alias compatible con el código externo enviado
+function checkPremium(feature){
+  if(!user.premium){
+    go('premium');
+    toast('Esta función es Premium ✦');
+    return false;
+  }
+  return true;
+}
+function openPremiumScreen(){ go('premium'); }
+function openDeepTherapy(){ if(!checkPremium('therapy')) return; go('terapia'); }
+
+function go(id){
+  if(id === currentScreen) return;
+  const oldEl  = document.getElementById('s-' + currentScreen);
+  const newEl  = document.getElementById('s-' + id);
+  const oldIdx = screens.indexOf(currentScreen);
+  const newIdx = screens.indexOf(id);
+
+  oldEl.classList.remove('active');
+  oldEl.classList.add(newIdx > oldIdx ? 'exit-up' : 'exit-down');
+  setTimeout(() => oldEl.classList.remove('exit-up','exit-down'), 600);
+
+  newEl.classList.add('active');
+  currentScreen = id;
+
+  document.querySelectorAll('.nav-tab').forEach((t,i) =>
+    t.classList.toggle('active', screens[i] === id)
+  );
+
+  // marcar link activo en el drawer
+  document.querySelectorAll('.nav-drawer-link').forEach(l => {
+    const fn = l.getAttribute('onclick') || '';
+    l.classList.toggle('drawer-active', fn.includes("'"+id+"'"));
+  });
+
+  if(id === 'niveles')  renderNiveles();
+  if(id === 'refugio')  { renderPosts(); initPreguntaDia(); }
+  if(id === 'ritual')   setAfirmacion();
+  if(id === 'menu')     renderMenuAuth();
+  if(id === 'test')     initTest();
+  if(id === 'sos')      renderSosCounter();
+  if(id === 'progreso') renderProgreso();
+  if(id === 'terapia')  renderTerapia();
+  if(id === 'notif')    renderNotifs();
+  if(id === 'programas') renderProgramas();
+}
+
+function toggleDrawer(){
+  document.getElementById('navBurger').classList.toggle('open');
+  document.getElementById('navDrawer').classList.toggle('open');
+  document.getElementById('drawerOverlay').classList.toggle('open');
+}
+function closeDrawer(){
+  document.getElementById('navBurger').classList.remove('open');
+  document.getElementById('navDrawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+}
+
+// ─────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─────────────────────────────────────
+// TEST
+// ─────────────────────────────────────
+const TEST_Q = [
+  { q: "¿Con qué frecuencia priorizas las necesidades de otros sobre las tuyas?",
+    opts: ["Siempre, es mi forma de ser","A menudo, me cuesta decir no","A veces, estoy aprendiendo","Rara vez, me pongo primero"] },
+  { q: "Cuando alguien te pide un favor que no quieres hacer, ¿qué haces?",
+    opts: ["Lo hago aunque me pese","Dudo mucho pero acabo cediendo","Intento negociar","Lo digo claramente y sin culpa"] },
+  { q: "¿Cómo describes tu relación contigo misma ahora mismo?",
+    opts: ["Me ignoro constantemente","Me cuesta verme con claridad","Estoy empezando a conocerme","Me cuido y me respeto"] },
+  { q: "¿Reconoces los patrones que repites en tus relaciones?",
+    opts: ["No, no los veo","Los veo a veces pero no sé cómo cambiarlos","Los reconozco y trabajo en ello","Los reconozco y actúo desde la consciencia"] },
+  { q: "¿Qué sientes cuando alguien te decepciona?",
+    opts: ["Me derrumbo completamente","Me duele mucho y tardo en recuperarme","Me duele pero me levanto","Lo proceso y sigo adelante con más claridad"] },
+  { q: "¿Cuánto tiempo llevas trabajando en ti misma?",
+    opts: ["Aún no he empezado","Recién empezando","Llevo un tiempo en el camino","Es parte de mi vida ya"] }
+];
+
+const NIVELES = [
+  { n:1, name:"La Grieta",        color:"#C4856E",
+    desc:"Algo dentro de ti se ha roto. Estás en el punto de partida, y aunque duele, aquí comienza todo. Las grietas dejan pasar la luz.",
+    msg:"El hecho de estar aquí ya es valentía." },
+  { n:2, name:"El Despertar",     color:"#C8935A",
+    desc:"Empiezas a ver patrones, a cuestionar lo que antes aceptabas. Algo en ti se está despertando. Es incómodo, y también es necesario.",
+    msg:"Estás empezando a verte. Eso cambia todo." },
+  { n:3, name:"Reconstrucción",   color:"#7AAF8B",
+    desc:"Ya no te conformas con sobrevivir. Estás construyendo conscientemente quién quieres ser. Es un proceso, no un destino.",
+    msg:"Cada decisión consciente es un ladrillo nuevo." },
+  { n:4, name:"Inquebrantable",   color:"#DDB07A",
+    desc:"Has integrado tu historia. Te priorizas sin culpa. Tus límites son actos de amor. Eres tu propia base.",
+    msg:"Has llegado a casa. A ti misma." }
+];
+
+let testScore = 0;
+let testQ = 0;
+
+function initTest(){
+  const saved = localStorage.getItem('inq-test-result');
+  if(saved){
+    showResult(JSON.parse(saved).score);
+    return;
+  }
+  testScore = 0; testQ = 0;
+  document.getElementById('test-questions').style.display = 'block';
+  document.getElementById('test-result').style.display    = 'none';
+  renderQ();
+}
+
+function renderQ(){
+  if(testQ >= TEST_Q.length){ showResult(testScore); return; }
+  const q = TEST_Q[testQ];
+  document.getElementById('qNum').textContent  = `Pregunta ${testQ+1} de ${TEST_Q.length}`;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('testBar').style.width = (testQ / TEST_Q.length * 100) + '%';
+
+  const opts = document.getElementById('qOptions');
+  opts.innerHTML = '';
+  q.opts.forEach((o,i) => {
+    const btn = document.createElement('button');
+    btn.className   = 'test-option';
+    btn.textContent = o;
+    btn.onclick = () => { testScore += i; testQ++; renderQ(); };
+    opts.appendChild(btn);
+  });
+  const qEl = document.getElementById('qText');
+  qEl.style.animation = 'none';
+  qEl.offsetHeight;
+  qEl.style.animation = 'riseUp 0.4s ease';
+}
+
+function showResult(score){
+  document.getElementById('testBar').style.width = '100%';
+  document.getElementById('test-questions').style.display = 'none';
+  const r = document.getElementById('test-result');
+  r.style.display = 'block';
+
+  const max = (TEST_Q.length - 1) * 3;
+  const pct = score / max;
+  let idx;
+  if(pct < 0.25)      idx = 0;
+  else if(pct < 0.5)  idx = 1;
+  else if(pct < 0.75) idx = 2;
+  else                idx = 3;
+
+  const nivel = NIVELES[idx];
+  document.getElementById('r-badge').textContent = 'Nivel ' + nivel.n;
+  document.getElementById('r-name').textContent  = nivel.name;
+  document.getElementById('r-name').style.color  = nivel.color;
+  document.getElementById('r-desc').textContent  = nivel.desc;
+  document.getElementById('r-msg').textContent   = '"' + nivel.msg + '"';
+
+  localStorage.setItem('inq-test-result', JSON.stringify({ score, levelIdx: idx }));
+  localStorage.setItem('inq-user-level',  idx);
+
+  setTimeout(() => {
+    document.getElementById('r-bar').style.width = ((idx+1)/4*100) + '%';
+  }, 300);
+
+  r.style.animation = 'riseUp 0.5s ease';
+}
+
+function resetTest(){
+  localStorage.removeItem('inq-test-result');
+  initTest();
+}
+
+// ─────────────────────────────────────
+// NIVELES
+// ─────────────────────────────────────
+function renderNiveles(){
+  const container  = document.getElementById('nivelesCards');
+  container.innerHTML = '';
+  const userLevel = parseInt(localStorage.getItem('inq-user-level') || '-1');
+
+  NIVELES.forEach((n,i) => {
+    const isCurrent = (i === userLevel);
+    const div = document.createElement('div');
+    div.className = 'nivel-card' + (isCurrent ? ' highlight' : '');
+    div.innerHTML = `
+      <div class="nivel-num">Nivel ${n.n}</div>
+      <div class="nivel-name" style="color:${isCurrent ? n.color : 'var(--cream)'}">
+        ${n.name}
+        ${isCurrent ? '<span class="nivel-tu-nivel">Tu nivel</span>' : ''}
+      </div>
+      <div class="nivel-desc">${n.desc}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// ─────────────────────────────────────
+// REFUGIO — PREGUNTA DEL DÍA
+// ─────────────────────────────────────
+const PREGUNTAS_DIA = [
+  "¿Qué es lo más difícil que has cargado sola esta semana?",
+  "¿Hubo un momento hoy en que te sentiste invisible?",
+  "¿Cuándo fue la última vez que te permitiste llorar sin pedir perdón por ello?",
+  "¿Qué parte de ti sientes que nadie ve realmente?",
+  "¿Hay algo que llevas tiempo queriendo decir pero no te has atrevido?",
+  "¿Qué emoción has estado evitando sentir últimamente?",
+  "¿En qué momento de esta semana te sentiste más tú misma?",
+  "¿Qué necesitarías escuchar ahora mismo de alguien que te quiere?",
+  "¿Hay algo de lo que te estás culpando y en realidad no es tu culpa?",
+  "¿Qué límite te cuesta más poner y por qué crees que es así?",
+  "¿Cuándo fue la última vez que pediste ayuda de verdad?",
+  "¿Qué parte de tu historia te da más vergüenza compartir?",
+  "¿Hay algo que perdiste durante este tiempo que todavía no has podido llorar?",
+  "¿Qué le dirías a la versión de ti que estaba en el peor momento?",
+  "¿Qué significa para ti sentirte segura?",
+  "¿Qué es lo primero que piensas cuando alguien te dice que eres fuerte?",
+  "¿Cuándo fue la última vez que hiciste algo solo por ti, sin justificarlo?",
+  "¿Hay una voz dentro de ti que te habla muy duro? ¿Qué te dice?",
+  "¿Qué parte de ti siente que aún no ha sanado?",
+  "¿Qué cosas pequeñas te están sosteniendo ahora mismo?",
+  "¿Hay algo que el cuerpo te está pidiendo que todavía no le has dado?",
+  "¿Cuándo fue la última vez que te sentiste orgullosa de ti misma?",
+  "¿Qué creencia sobre ti misma quisieras poder soltar?",
+  "¿A quién o qué has estado esperando que te salve?",
+  "¿Qué cosa que consideras debilidad podría en realidad ser una fortaleza?",
+  "¿Qué es lo que más extrañas de antes de que todo se rompiera?",
+  "¿Hay algo que sigues haciendo por miedo, no por amor?",
+  "¿Qué te ayuda a respirar cuando sientes que no puedes más?",
+  "¿Hay algo que te cuesta perdonarte a ti misma?",
+  "¿Qué te gustaría que las personas que te rodean entendieran de verdad?"
+];
+
+function initPreguntaDia(){
+  const el = document.getElementById('pregunta-dia-texto');
+  if(!el) return;
+  // índice basado en el día del año para que cambie cada día
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const dia = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const idx = dia % PREGUNTAS_DIA.length;
+  el.textContent = PREGUNTAS_DIA[idx];
+}
+
+function responderPregunta(){
+  const pregunta = document.getElementById('pregunta-dia-texto').textContent;
+  const textarea = document.getElementById('refugio-input');
+  if(!textarea) return;
+  textarea.value = '';
+  textarea.placeholder = pregunta;
+  textarea.focus();
+}
+
+// REFUGIO
+// ─────────────────────────────────────
+let postSortMode = 'recientes';
+
+function setSortPosts(mode){
+  postSortMode = mode;
+  document.getElementById('sort-recientes').classList.toggle('active', mode === 'recientes');
+  document.getElementById('sort-populares').classList.toggle('active', mode === 'populares');
+  renderPosts();
+}
+
+const bannedWords = ["idiota","imbecil","puta","mierda","gilipollas","estupido","cabron","puto","imbécil","estúpido","cabrón"];
+
+function contienePalabraProhibida(texto){
+  const lower = texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  return bannedWords.some(w => {
+    const wn = w.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+    return new RegExp('\\b' + wn + '\\b').test(lower);
+  });
+}
+
+function publicarPost(){
+  const texto = document.getElementById('refugio-input').value.trim();
+  if(!texto){ toast('Escribe algo primero.'); return; }
+  if(contienePalabraProhibida(texto)){
+    toast('En El Refugio cuidamos el respeto y el apoyo mutuo. Reformula tu mensaje.');
+    return;
+  }
+  const session = JSON.parse(localStorage.getItem('inq-session') || '{}');
+  const autor   = session.nick || 'Anónima';
+  const posts   = JSON.parse(localStorage.getItem('inq-posts') || '[]');
+  posts.unshift({
+    id: Date.now(),
+    texto,
+    autor,
+    fecha: new Date().toLocaleDateString('es-ES', { day:'numeric', month:'short' }),
+    corazones: 0,
+    likedByMe: false,
+    comentarios: []
+  });
+  localStorage.setItem('inq-posts', JSON.stringify(posts));
+  document.getElementById('refugio-input').value = '';
+  // actualizar contador perfil
+  const pd = JSON.parse(localStorage.getItem('inq-perfil-extra') || '{}');
+  pd.posts = (pd.posts || 0) + 1;
+  localStorage.setItem('inq-perfil-extra', JSON.stringify(pd));
+  renderPosts();
+  toast('Compartido en la comunidad ✦');
+}
+
+function toggleHeart(id){
+  const posts = JSON.parse(localStorage.getItem('inq-posts') || '[]');
+  const p = posts.find(p => p.id === id);
+  if(p){
+    p.likedByMe = !p.likedByMe;
+    p.corazones += (p.likedByMe ? 1 : -1);
+    if(p.likedByMe) añadirNotif('Alguien apoyó tu mensaje en la comunidad 💗', 'apoyo');
+  }
+  localStorage.setItem('inq-posts', JSON.stringify(posts));
+  renderPosts();
+}
+
+function toggleComentarios(id){
+  const el = document.getElementById('comentarios-' + id);
+  if(el) el.classList.toggle('open');
+}
+
+function enviarComentario(id){
+  const input = document.getElementById('comment-input-' + id);
+  const texto = input ? input.value.trim() : '';
+  if(!texto) return;
+  const session = JSON.parse(localStorage.getItem('inq-session') || '{}');
+  const autor   = session.nick || 'Anónima';
+  const posts   = JSON.parse(localStorage.getItem('inq-posts') || '[]');
+  const p       = posts.find(p => p.id === id);
+  if(p){
+    if(!p.comentarios) p.comentarios = [];
+    p.comentarios.push({ autor, texto, fecha: new Date().toLocaleDateString('es-ES', { day:'numeric', month:'short' }) });
+    if(p.autor !== autor) añadirNotif('Alguien respondió a tu publicación 💬', 'respuesta');
+  }
+  localStorage.setItem('inq-posts', JSON.stringify(posts));
+  renderPosts();
+  // re-abrir sección comentarios tras renderizar
+  setTimeout(() => {
+    const el = document.getElementById('comentarios-' + id);
+    if(el) el.classList.add('open');
+  }, 50);
+}
+
+function renderPosts(){
+  const container = document.getElementById('refugio-posts');
+  let posts = JSON.parse(localStorage.getItem('inq-posts') || '[]');
+  if(!posts.length){
+    container.innerHTML = '<div class="post-empty">Las voces del refugio aparecerán aquí…</div>';
+    return;
+  }
+  if(postSortMode === 'populares'){
+    posts = [...posts].sort((a,b) => b.corazones - a.corazones);
+  }
+  const APOYO_LABELS = ['Estoy contigo 🤍', 'Te mando amor 🤍', 'Aquí estoy 🤍', 'Con todo mi apoyo 🤍'];
+  container.innerHTML = posts.map(p => {
+    const comentarios = p.comentarios || [];
+    const apoyoLabel  = APOYO_LABELS[p.id % APOYO_LABELS.length];
+    const comentariosHtml = comentarios.map(c => `
+      <div class="comentario-item">
+        <span class="comentario-autor">${c.autor}</span>
+        <span class="comentario-texto">${c.texto}</span>
+        <span class="comentario-fecha">${c.fecha || ''}</span>
+      </div>
+    `).join('');
+    return `
+    <div class="post-card">
+      <div class="post-meta">
+        <span class="post-autor">${p.autor || 'Anónima'}</span>
+        <span class="post-fecha">${p.fecha || ''}</span>
+      </div>
+      <div class="post-text">${p.texto}</div>
+      <div class="post-actions">
+        <button class="post-heart ${p.likedByMe ? 'liked' : ''}"
+          onclick="toggleHeart(${p.id})" style="font-size:12px;letter-spacing:0.3px;padding:7px 14px">
+          ${p.likedByMe ? '🤍' : '🤍'} <span>${apoyoLabel.replace('🤍','').trim()}</span>
+          <span class="post-apoyo-count">${p.corazones > 0 ? ' · ' + p.corazones : ''}</span>
+        </button>
+        <button class="post-reply-btn" onclick="toggleComentarios(${p.id})">
+          💬 ${comentarios.length}
+        </button>
+      </div>
+      <div class="comentarios-wrap" id="comentarios-${p.id}">
+        ${comentariosHtml}
+        <div class="comentario-nuevo">
+          <input class="comentario-input" id="comment-input-${p.id}"
+            placeholder="Responder con apoyo…" type="text">
+          <button class="comentario-send" onclick="enviarComentario(${p.id})">→</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────
+// RITUAL
+// ─────────────────────────────────────
+const AFIRMACIONES = [
+  "Hoy me elijo a mí.",
+  "Mi energía es mía. La invierto con criterio.",
+  "No me rompí. Me abrí para renacer.",
+  "Mis límites son actos de amor.",
+  "Soy suficiente, sin dar nada extra.",
+  "De mis grietas nació mi fuerza.",
+  "Hoy cierro lo que ya no me pertenece.",
+  "Merezco el mismo cuidado que doy.",
+  "Ser fiel a mí misma no es traicionar a nadie.",
+  "Mi prioridad soy yo."
+];
+
+// ─────────────────────────────────────
+// RITUAL — variables de estado
+// ─────────────────────────────────────
+let ritualRespTimer  = null;
+let ritualRespActivo = false;
+
+function setAfirmacion(){
+  const idx = new Date().getDay() % AFIRMACIONES.length;
+
+  // La afirmación solo se desbloquea si la respiración fue completada HOY
+  const hoy      = new Date().toDateString();
+  const respDone = localStorage.getItem('inq-ritual-resp') === hoy;
+
+  const lockEl   = document.getElementById('afirmacion-lock');
+  const revealEl = document.getElementById('afirmacion-reveal');
+  const afirbtn  = document.getElementById('ritual-afirmar-btn');
+  const textEl   = document.getElementById('afirmacion-text');
+
+  if(!respDone){
+    // Estado inicial: bloqueado
+    if(lockEl)   lockEl.style.display   = 'block';
+    if(revealEl) revealEl.style.display = 'none';
+    if(afirbtn)  afirbtn.style.display  = 'none';
+    // Resetear respiración
+    ritualRespActivo = false;
+    clearTimeout(ritualRespTimer);
+    const btn = document.getElementById('ritual-breath-btn');
+    const lbl = document.getElementById('ritual-breath-lbl');
+    const orb = document.getElementById('ritual-orb');
+    if(btn){ btn.disabled=false; btn.style.borderColor=''; btn.style.color=''; btn.innerHTML='<span>Comenzar respiración</span>'; btn.onclick=iniciarRespiracionRitual; }
+    if(lbl) lbl.textContent = 'Inhala… exhala…';
+    if(orb) orb.classList.remove('ritual-orb-expand','ritual-orb-contract');
+  } else {
+    // Respiración ya hecha hoy — ver si el texto está escrito
+    const texto = (document.getElementById('ritual-input')||{}).value || '';
+    if(texto.trim().length >= 5){
+      // Mostrar afirmación adaptada
+      if(textEl) textEl.textContent = getAfirmacionAdaptada(texto);
+      if(lockEl)   lockEl.style.display   = 'none';
+      if(revealEl) revealEl.style.display = 'block';
+      if(afirbtn)  afirbtn.style.display  = 'none';
+    } else {
+      // Respiración hecha pero texto pendiente
+      if(lockEl)   { lockEl.style.display='block'; lockEl.querySelector('.afirmacion-lock-txt').textContent='Escribe cómo te sientes para desbloquear tu afirmación'; }
+      if(revealEl) revealEl.style.display = 'none';
+      if(afirbtn)  afirbtn.style.display  = 'block';
+    }
+  }
+}
+
+// Detección de sentimiento y afirmación adaptada
+function getAfirmacionAdaptada(texto){
+  const t = texto.toLowerCase();
+  const tristeza   = ['triste','llorar','lloré','sola','vacía','vacia','perdida','oscura','dolor','duele','cansada','agotada','rota','no puedo','difícil','dificil'];
+  const ansiedad   = ['ansiosa','nerviosa','angustia','miedo','ansiedad','preocupada','tensión','tension','agitada','pánico','panico','abrumada','estresada'];
+  const superacion = ['logré','logre','pude','conseguí','consegui','fuerza','orgullosa','avancé','avance','mejor','superar','supere','crecí','creci','valiente'];
+  const enojo      = ['rabia','ira','enfadada','enfurecida','harta','enfadada','molesta','frustrada','irritada'];
+
+  const matchScore = (kws) => kws.filter(k => t.includes(k)).length;
+  const scores = {
+    tristeza: matchScore(tristeza),
+    ansiedad: matchScore(ansiedad),
+    superacion: matchScore(superacion),
+    enojo: matchScore(enojo)
+  };
+  const top = Object.entries(scores).sort((a,b)=>b[1]-a[1])[0];
+
+  if(top[1] === 0){
+    // neutro — afirmación del día por defecto
+    return AFIRMACIONES[new Date().getDay() % AFIRMACIONES.length];
+  }
+  const afirmaciones = {
+    tristeza: [
+      'La tristeza que sientes también forma parte de ti. No hay que correrla. Estás permitiéndote sentir, y eso es valioso.',
+      'El dolor que cargas hoy no será eterno. Cada momento que atraviesas te acerca a la orilla.',
+      'Que seas capaz de nombrarlo ya es un acto de valentía. Mereces ternura, especialmente la tuya.'
+    ],
+    ansiedad: [
+      'Tu cuerpo está intentando protegerte. Respira. Estás a salvo en este momento, ahora mismo.',
+      'La ansiedad miente: no todo lo que temes ocurrirá. Devuélvete al presente. Aquí estás, aquí estoy.',
+      'Un paso a la vez. No tienes que resolver hoy todo lo que te preocupa. Solo hoy.'
+    ],
+    superacion: [
+      'Mira lo lejos que has llegado. Lo que superaste no fue pequeño — fuiste tú quien lo hizo posible.',
+      'Tu fuerza no vino de no caer. Vino de levantarte cada vez. Y lo sigues haciendo.',
+      'Estás creciendo incluso cuando no lo parece. Hoy lo demuestra.'
+    ],
+    enojo: [
+      'Tu enojo tiene sentido. Lo que sientes es válido. Respira y deja que tu cuerpo lo procese.',
+      'La rabia también es información. Escúchala sin dejar que te consuma. Tienes el control.',
+      'Es humano sentir lo que sientes. El paso siguiente es tuyo: elige cómo responder, no solo reaccionar.'
+    ]
+  };
+  const lista = afirmaciones[top[0]];
+  return lista[Math.floor(Math.random() * lista.length)];
+}
+
+function checkRitualAfirmacion(){
+  // Se llama al escribir en el textarea del ritual
+  const hoy     = new Date().toDateString();
+  const respDone = localStorage.getItem('inq-ritual-resp') === hoy;
+  if(!respDone) return; // respiración no completada, no hacer nada
+  const texto  = (document.getElementById('ritual-input')||{}).value || '';
+  const afirbtn= document.getElementById('ritual-afirmar-btn');
+  if(afirbtn) afirbtn.style.display = texto.trim().length >= 5 ? 'block' : 'none';
+}
+
+function desbloquearAfirmacionConTexto(e){
+  e.stopPropagation();
+  const texto  = (document.getElementById('ritual-input')||{}).value || '';
+  if(texto.trim().length < 5){ toast('Escribe un poco más antes de continuar.'); return; }
+  const textEl = document.getElementById('afirmacion-text');
+  const lockEl = document.getElementById('afirmacion-lock');
+  const revEl  = document.getElementById('afirmacion-reveal');
+  const btn    = document.getElementById('ritual-afirmar-btn');
+  if(textEl) textEl.textContent = getAfirmacionAdaptada(texto);
+  if(lockEl) lockEl.style.display = 'none';
+  if(revEl){
+    revEl.style.display = 'block';
+    revEl.classList.add('afirmacion-unlock-anim');
+  }
+  if(btn) btn.style.display = 'none';
+  // marcar paso 2 como hecho
+  const check2 = document.getElementById('check2');
+  const step2  = document.getElementById('step2');
+  if(step2) step2.classList.add('done');
+  if(check2){ check2.style.background='var(--gold)'; check2.style.borderColor='var(--gold)'; check2.style.color='var(--bg)'; }
+  toast('Afirmación adaptada a ti ✦');
+}
+
+function toggleStep(n){
+  const step  = document.getElementById('step' + n);
+  const check = document.getElementById('check' + n);
+  step.classList.toggle('done');
+  const done = step.classList.contains('done');
+  check.style.background  = done ? 'var(--gold)' : '';
+  check.style.borderColor = done ? 'var(--gold)' : 'var(--border)';
+  check.style.color       = done ? 'var(--bg)'   : 'transparent';
+  if(n === 1) document.getElementById('breath1').classList.toggle('active', done);
+  if(n === 2) document.getElementById('ritual-input').classList.toggle('active', done);
+}
+
+// ─────────────────────────────────────
+// RITUAL — RESPIRACIÓN CON VOZ
+// ─────────────────────────────────────
+
+function hablar(texto, rate){
+  return new Promise(resolve => {
+    if(!window.speechSynthesis){ resolve(); return; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(texto);
+    u.lang  = 'es-ES';
+    u.rate  = rate || 0.72;   // más lento = más calmado
+    u.pitch = 1.15;            // más agudo = más dulce
+    u.volume = 0.85;
+    // preferir voz femenina si está disponible
+    const voces = speechSynthesis.getVoices();
+    const vFem = voces.find(v => v.lang.startsWith('es') && /female|mujer|Monica|Paulina|Lucia|Conchita|María|Valeria/i.test(v.name))
+              || voces.find(v => v.lang.startsWith('es'));
+    if(vFem) u.voice = vFem;
+    u.onend = resolve;
+    speechSynthesis.speak(u);
+  });
+}
+
+function iniciarRespiracionRitual(e){
+  e.stopPropagation();
+  if(ritualRespActivo) return;
+  ritualRespActivo = true;
+
+  const btn  = document.getElementById('ritual-breath-btn');
+  const lbl  = document.getElementById('ritual-breath-lbl');
+  const orb  = document.getElementById('ritual-orb');
+  btn.disabled = true;
+  btn.querySelector('span').textContent = 'Respirando…';
+
+  // resetear anillo al inicio
+  const ring = document.getElementById('ritual-ring-prog');
+  if(ring){ ring.style.transition = 'none'; ring.style.strokeDashoffset = 327; void ring.offsetWidth; ring.style.transition = ''; }
+
+  let ciclo = 0;
+  const totalCiclos = 3;
+
+  async function runCiclo(){
+    if(ciclo >= totalCiclos){
+      // completado — anillo lleno
+      clearInterval(_ritualRingTimer);
+      if(ring){ ring.style.strokeDashoffset = 0; }
+      orb.classList.remove('ritual-orb-expand','ritual-orb-contract');
+      lbl.textContent = '✦ Respiración completada';
+      btn.querySelector('span').textContent = 'Completado';
+      btn.style.borderColor = 'var(--gold)';
+      btn.style.color       = 'var(--gold)';
+      await hablar('Completado', 0.72);
+      // desbloquear afirmación
+      localStorage.setItem('inq-ritual-resp', new Date().toDateString());
+      registrarHabito('ritual');
+      setTimeout(() => {
+        // marcar paso 1 como hecho
+        const check1 = document.getElementById('check1');
+        const step1  = document.getElementById('step1');
+        if(step1) step1.classList.add('done');
+        if(check1){ check1.style.background='var(--gold)'; check1.style.borderColor='var(--gold)'; check1.style.color='var(--bg)'; }
+        // comprobar si ya hay texto escrito
+        const texto  = (document.getElementById('ritual-input')||{}).value || '';
+        const lockEl = document.getElementById('afirmacion-lock');
+        const lockTxt= lockEl ? lockEl.querySelector('.afirmacion-lock-txt') : null;
+        const afirbtn= document.getElementById('ritual-afirmar-btn');
+        if(texto.trim().length >= 5){
+          // tiene texto → mostrar afirmación directamente
+          const textEl = document.getElementById('afirmacion-text');
+          const revEl  = document.getElementById('afirmacion-reveal');
+          if(textEl) textEl.textContent = getAfirmacionAdaptada(texto);
+          if(lockEl) lockEl.style.display = 'none';
+          if(revEl){ revEl.style.display = 'block'; revEl.classList.add('afirmacion-unlock-anim'); }
+          if(afirbtn) afirbtn.style.display = 'none';
+          toast('Afirmación adaptada a ti ✦');
+        } else {
+          // sin texto → cambiar mensaje de bloqueo
+          if(lockTxt) lockTxt.textContent = 'Escribe cómo te sientes para recibir tu afirmación';
+          if(afirbtn) afirbtn.style.display = 'none'; // aparecerá al escribir
+        }
+      }, 600);
+      ritualRespActivo = false;
+      return;
+    }
+
+    // Inhala — 4s
+    lbl.textContent = 'Inhala…';
+    orb.classList.remove('ritual-orb-contract');
+    orb.classList.add('ritual-orb-expand');
+    setRitualRing(ciclo, 0, 4000);          // fase 0 de 3 fases
+    await hablar('Inhala', 0.72);
+    await delay(3400);
+
+    // Mantén — 7s
+    lbl.textContent = 'Mantén…';
+    setRitualRing(ciclo, 1, 7000);
+    await hablar('Mantén', 0.65);
+    await delay(6500);
+
+    // Exhala — 8s
+    lbl.textContent = 'Exhala…';
+    orb.classList.remove('ritual-orb-expand');
+    orb.classList.add('ritual-orb-contract');
+    setRitualRing(ciclo, 2, 8000);
+    await hablar('Exhala', 0.65);
+    await delay(7500);
+
+    ciclo++;
+    runCiclo();
+  }
+
+  // abrir paso 1
+  document.getElementById('breath1').classList.add('active');
+  runCiclo();
+}
+
+function delay(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+// Anillo de progreso ritual — 4-7-8
+// ciclo 0-2, fase 0=inhala 1=mantén 2=exhala, duración en ms
+let _ritualRingTimer = null;
+function setRitualRing(ciclo, fase, duracion){
+  const ring = document.getElementById('ritual-ring-prog');
+  if(!ring) return;
+  clearInterval(_ritualRingTimer);
+
+  const TOTAL_CICLOS = 3;
+  const TOTAL_DURACION = (4 + 7 + 8) * 1000; // un ciclo completo = 19s
+  const CIRCUNFERENCIA = 327; // 2π×52
+
+  // progreso base del ciclo actual (0 a 1)
+  const basePorCiclo = 1 / TOTAL_CICLOS;
+  // duración acumulada en ms dentro del ciclo: inhala=4000 mantén=7000 exhala=8000
+  const faseDuraciones = [4000, 7000, 8000];
+  const faseOffset = faseDuraciones.slice(0, fase).reduce((a,b)=>a+b, 0);
+  const cicloTotal = faseDuraciones.reduce((a,b)=>a+b, 0); // 19000ms
+
+  const startTime = Date.now();
+  const startPct  = (ciclo / TOTAL_CICLOS) + (faseOffset / cicloTotal) * basePorCiclo;
+
+  _ritualRingTimer = setInterval(() => {
+    const elapsed = Date.now() - startTime;
+    const phasePct = Math.min(elapsed / duracion, 1);
+    const endPct = (ciclo / TOTAL_CICLOS) + ((faseOffset + faseDuraciones[fase]) / cicloTotal) * basePorCiclo;
+    const currentPct = startPct + (endPct - startPct) * phasePct;
+    const offset = CIRCUNFERENCIA * (1 - currentPct);
+    ring.style.strokeDashoffset = offset;
+    if(phasePct >= 1) clearInterval(_ritualRingTimer);
+  }, 50);
+}
+
+// ─────────────────────────────────────
+// AUTH
+// ─────────────────────────────────────
+function handleRegister(){
+  const nick  = document.getElementById('reg-nick').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass  = document.getElementById('reg-pass').value;
+  const msg   = document.getElementById('reg-msg');
+  if(!nick)  { msg.textContent = 'Elige un nickname'; msg.style.color = '#D07070'; return; }
+  if(!email || !/\S+@\S+\.\S+/.test(email)) { msg.textContent = 'Email no válido'; msg.style.color = '#D07070'; return; }
+  if(pass.length < 6) { msg.textContent = 'Mínimo 6 caracteres'; msg.style.color = '#D07070'; return; }
+  const accounts = JSON.parse(localStorage.getItem('inq-accounts') || '{}');
+  if(accounts[email]) { msg.textContent = 'Email ya registrado'; msg.style.color = '#D07070'; return; }
+  accounts[email] = { password: pass, nick, fecha: new Date().toISOString() };
+  localStorage.setItem('inq-accounts', JSON.stringify(accounts));
+  localStorage.setItem('inq-session',  JSON.stringify({ email, nick, loggedIn: true }));
+  msg.style.color  = 'var(--gold)';
+  msg.textContent  = '✓ Bienvenida, ' + nick + '!';
+  ['reg-nick','reg-email','reg-pass'].forEach(id => document.getElementById(id).value = '');
+  setTimeout(renderMenuAuth, 900);
+}
+
+function handleLogin(){
+  const email = document.getElementById('log-email').value.trim();
+  const pass  = document.getElementById('log-pass').value;
+  const msg   = document.getElementById('log-msg');
+  const accounts = JSON.parse(localStorage.getItem('inq-accounts') || '{}');
+  const acc = accounts[email];
+  if(!acc || acc.password !== pass){
+    msg.textContent = 'Email o contraseña incorrectos';
+    msg.style.color = '#D07070'; return;
+  }
+  localStorage.setItem('inq-session', JSON.stringify({ email, nick: acc.nick, loggedIn: true }));
+  msg.style.color = 'var(--gold)';
+  msg.textContent = '✓ Bienvenida de nuevo, ' + acc.nick + '!';
+  ['log-email','log-pass'].forEach(id => document.getElementById(id).value = '');
+  setTimeout(renderMenuAuth, 900);
+}
+
+function handleLogout(){
+  localStorage.removeItem('inq-session');
+  renderMenuAuth();
+  toast('Sesión cerrada');
+}
+
+function handleContact(){
+  const name  = document.getElementById('contact-name').value.trim();
+  const email = document.getElementById('contact-email').value.trim();
+  const cmsg  = document.getElementById('contact-msg').value.trim();
+  const fb    = document.getElementById('contact-feedback');
+  if(!name || !cmsg){ fb.textContent = 'Rellena nombre y mensaje'; fb.style.color = '#D07070'; return; }
+  const msgs = JSON.parse(localStorage.getItem('inq-contact-msgs') || '[]');
+  msgs.push({ name, email, msg: cmsg, date: new Date().toLocaleDateString('es-ES') });
+  localStorage.setItem('inq-contact-msgs', JSON.stringify(msgs));
+  fb.style.color = 'var(--gold)';
+  fb.textContent = '✓ Mensaje enviado, gracias ' + name + '!';
+  ['contact-name','contact-email','contact-msg'].forEach(id => document.getElementById(id).value = '');
+}
+
+function renderMenuAuth(){
+  const session  = JSON.parse(localStorage.getItem('inq-session') || 'null');
+  const loggedIn = session?.loggedIn;
+
+  document.getElementById('menu-noauth').style.display = loggedIn ? 'none'  : 'block';
+  document.getElementById('menu-auth').style.display   = loggedIn ? 'block' : 'none';
+
+  if(loggedIn){
+    const letra = (session.nick || session.email || 'I')[0].toUpperCase();
+    const LVLS  = ['La Grieta','El Despertar','Reconstrucción','Inquebrantable'];
+    const lvlIdx = localStorage.getItem('inq-user-level');
+
+    document.getElementById('mp-avatar').textContent  = letra;
+    document.getElementById('mp-nombre').textContent  = session.nick || 'Usuaria';
+    document.getElementById('mp-email-display').textContent = session.email || '';
+
+    // fecha registro
+    const accs = JSON.parse(localStorage.getItem('inq-accounts') || '{}');
+    const acc  = accs[session.email] || {};
+    if(acc.fecha){
+      const f = new Date(acc.fecha).toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
+      document.getElementById('mp-miembro').textContent   = 'Miembro desde ' + f;
+      document.getElementById('mp-fecha-registro').textContent = f;
+    }
+
+    // stats
+    const dias  = calcDiasFuertes(getProgresoData());
+    const posts = JSON.parse(localStorage.getItem('inq-posts') || '[]')
+      .filter(p => p.autor === session.nick).length;
+    document.getElementById('mp-dias').textContent  = dias;
+    document.getElementById('mp-posts').textContent = posts;
+    document.getElementById('mp-nivel').textContent = lvlIdx !== null ? LVLS[+lvlIdx] : '—';
+
+    // bio
+    const bio = localStorage.getItem('inq-bio-' + session.email) || '';
+    document.getElementById('mp-bio').value = bio;
+  }
+}
+
+function guardarBioMenu(){
+  const sess = JSON.parse(localStorage.getItem('inq-session') || '{}');
+  if(!sess.loggedIn){ return; }
+  const bio = document.getElementById('mp-bio').value.trim();
+  localStorage.setItem('inq-bio-' + sess.email, bio);
+  mostrarMsg('mp-bio-msg','Guardado ✦','ok');
+}
+
+function handleContact2(){
+  const email = document.getElementById('contact-email2').value.trim();
+  const cmsg  = document.getElementById('contact-msg2').value.trim();
+  const fb    = document.getElementById('contact-feedback2');
+  const sess  = JSON.parse(localStorage.getItem('inq-session') || '{}');
+  if(!cmsg){ fb.textContent = 'Escribe tu mensaje'; fb.style.color = '#D07070'; return; }
+  const msgs = JSON.parse(localStorage.getItem('inq-contact-msgs') || '[]');
+  msgs.push({ name: sess.nick || 'Usuaria', email: email || sess.email, msg: cmsg, date: new Date().toLocaleDateString('es-ES') });
+  localStorage.setItem('inq-contact-msgs', JSON.stringify(msgs));
+  fb.style.color = 'var(--gold)';
+  fb.textContent = '✓ Mensaje enviado, gracias!';
+  ['contact-email2','contact-msg2'].forEach(id => document.getElementById(id).value = '');
+}
+
+function switchMenuTab(tab){
+  document.querySelectorAll('.menu-tab-btn').forEach((b,i) =>
+    b.classList.toggle('active', ['registro','login','contacto'][i] === tab)
+  );
+  ['mp-registro','mp-login','mp-contacto'].forEach(id =>
+    document.getElementById(id).classList.toggle('active', id === 'mp-' + tab)
+  );
+}
+
+// ─────────────────────────────────────
+// INIT
+// ─────────────────────────────────────
+setAfirmacion();
+renderPosts();
+renderMenuAuth();
+
+// ═══════════════════════════════════════
+// PROGRESO / RECAÍDAS
+// ═══════════════════════════════════════
+function getProgresoData(){
+  return JSON.parse(localStorage.getItem('inq-progreso') || JSON.stringify({
+    inicio: new Date().toISOString(),
+    recaidas: [],
+    mejorRacha: 0
+  }));
+}
+function saveProgresoData(d){
+  localStorage.setItem('inq-progreso', JSON.stringify(d));
+}
+function calcDiasFuertes(d){
+  const ultima = d.recaidas.length ? new Date(d.recaidas[d.recaidas.length-1]) : new Date(d.inicio);
+  const ahora  = new Date();
+  return Math.max(0, Math.floor((ahora - ultima) / 86400000));
+}
+function renderProgreso(){
+  const d    = getProgresoData();
+  const dias = calcDiasFuertes(d);
+  const inicio = new Date(d.inicio);
+
+  document.getElementById('progreso-dias').textContent = dias;
+  document.getElementById('progreso-desde').textContent =
+    'desde ' + inicio.toLocaleDateString('es-ES', {day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('progreso-total-dias').textContent =
+    Math.floor((new Date() - inicio) / 86400000);
+  document.getElementById('progreso-recaidas').textContent = d.recaidas.length;
+  document.getElementById('progreso-racha-max').textContent = d.mejorRacha;
+
+  // historial
+  const hist = document.getElementById('progreso-hist');
+  if(!d.recaidas.length){
+    hist.innerHTML = '<div class="hist-empty">Sin recaídas registradas. ¡Sigue así!</div>';
+  } else {
+    hist.innerHTML = [...d.recaidas].reverse().map(r => {
+      const fecha = new Date(r).toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
+      return `<div class="hist-item">
+        <span class="hist-dot">◎</span>
+        <span class="hist-fecha">${fecha}</span>
+        <span class="hist-label">Recaída registrada</span>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('recaida-apoyo').style.display = 'none';
+
+  // color de racha
+  const card = document.getElementById('progreso-racha-card');
+  if(dias >= 30) card.style.borderColor = 'rgba(122,175,139,0.5)';
+  else if(dias >= 7) card.style.borderColor = 'rgba(196,48,106,0.4)';
+  else card.style.borderColor = 'var(--border)';
+}
+function registrarRecaida(){
+  const d = getProgresoData();
+  const dias = calcDiasFuertes(d);
+  if(dias > d.mejorRacha) d.mejorRacha = dias;
+  d.recaidas.push(new Date().toISOString());
+  saveProgresoData(d);
+
+  // Mensajes empáticos tipo IA según días de racha anterior
+  let mensaje;
+  if(dias >= 30){
+    mensaje = 'Treinta días de racha no desaparecen con una recaída. Los llevas dentro. Volver a empezar desde aquí es diferente a empezar desde cero — traes todo lo aprendido.';
+  } else if(dias >= 14){
+    mensaje = 'Dos semanas de trabajo real. Eso no se borra. Las recaídas no borran tu camino — son parte de él. Cada vez que vuelves, lo haces más fuerte y más consciente.';
+  } else if(dias >= 7){
+    mensaje = 'Una semana de esfuerzo ya cambió algo en ti, aunque no lo notes ahora mismo. Registrarlo con honestidad es exactamente lo que hace alguien que se está reconstruyendo de verdad.';
+  } else if(dias >= 1){
+    mensaje = 'Registrar esto requiere valentía. No estás fallando — estás siendo honesta contigo misma, y eso es más difícil y más valioso que cualquier racha perfecta.';
+  } else {
+    mensaje = 'Las recaídas no definen tu historia. Solo son un momento en ella. Lo que defines es lo que haces después, y ya estás haciendo lo correcto: nombrarlo y seguir.';
+  }
+
+  const apoyo = document.getElementById('recaida-apoyo');
+  apoyo.style.color     = 'var(--gold)';
+  apoyo.style.fontSize  = '13px';
+  apoyo.style.lineHeight= '1.8';
+  apoyo.textContent = mensaje;
+  apoyo.style.display = 'block';
+
+  añadirNotif('💙 Nueva racha comenzada. Cada día suma.', 'progreso');
+  renderProgreso();
+}
+
+// ═══════════════════════════════════════
+// MODO TERAPIA
+// ═══════════════════════════════════════
+function renderTerapia(){
+  const hoy  = new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('terapia-fecha').textContent = hoy.charAt(0).toUpperCase() + hoy.slice(1);
+
+  // cargar borrador del día si existe
+  const key   = 'inq-terapia-' + new Date().toDateString();
+  const saved = JSON.parse(localStorage.getItem(key) || '{}');
+  [1,2,3,4,5].forEach(i => {
+    const ta = document.getElementById('ta-' + i);
+    if(ta && saved['ta'+i]) ta.value = saved['ta'+i];
+  });
+
+  // historial
+  renderTerapiaHist();
+}
+async function guardarTerapia(){
+  const key    = 'inq-terapia-' + new Date().toDateString();
+  const entry  = { fecha: new Date().toISOString() };
+  let vacio = true;
+  [1,2,3,4,5].forEach(i => {
+    const v = document.getElementById('ta-' + i).value.trim();
+    entry['ta'+i] = v;
+    if(v) vacio = false;
+  });
+  if(vacio){ mostrarMsg('terapia-msg','Escribe algo antes de guardar.','err'); return; }
+  localStorage.setItem(key, JSON.stringify(entry));
+
+  // guardar en historial
+  const hist = JSON.parse(localStorage.getItem('inq-terapia-hist') || '[]');
+  const idx  = hist.findIndex(h => h.fecha && h.fecha.startsWith(new Date().toDateString().slice(0,10)));
+  if(idx >= 0) hist[idx] = entry; else hist.unshift(entry);
+  localStorage.setItem('inq-terapia-hist', JSON.stringify(hist.slice(0,60)));
+
+  // Mostrar estado de carga
+  const msgEl = document.getElementById('terapia-msg');
+  msgEl.style.color     = 'var(--muted)';
+  msgEl.style.fontSize  = '12px';
+  msgEl.style.lineHeight= '1.9';
+  msgEl.style.padding   = '20px 0 4px';
+  msgEl.innerHTML = '<p style="text-align:center;letter-spacing:2px;text-transform:uppercase">Analizando tu reflexión…</p>';
+
+  // Evaluación con IA real (o fallback offline)
+  const valoracion = await generarEvaluacionIA(entry);
+  msgEl.style.color    = 'var(--gold)';
+  msgEl.style.fontSize = '13px';
+  // Renderizar secciones: detectar encabezados **TEXTO** → título visual
+  const html = valoracion
+    .split('\n\n')
+    .filter(p => p.trim())
+    .map(p => {
+      const trimmed = p.trim();
+      // Encabezado tipo **ESTADO EMOCIONAL ACTUAL**
+      if(/^\*\*[A-ZÁÉÍÓÚÑ\s]+\*\*$/.test(trimmed)){
+        const titulo = trimmed.replace(/\*\*/g,'');
+        return `<p style="margin:18px 0 6px 0;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--rose);font-family:'DM Sans',sans-serif">${titulo}</p>`;
+      }
+      // Párrafo normal
+      return `<p style="margin:0 0 14px 0">${trimmed.replace(/\*\*/g,'')}</p>`;
+    })
+    .join('');
+  msgEl.innerHTML = html;
+
+  añadirNotif('✦ Completaste tu reflexión de hoy.', 'terapia');
+  registrarHabito('terapia');
+  renderTerapiaHist();
+}
+
+// ── EVALUACIÓN CON IA REAL (Claude API) ──
+async function generarEvaluacionIA(entry){
+  const t1 = (entry.ta1||'').trim();
+  const t2 = (entry.ta2||'').trim();
+  const t3 = (entry.ta3||'').trim();
+  const t4 = (entry.ta4||'').trim();
+  const t5 = (entry.ta5||'').trim();
+
+  const respuestasTexto = [
+    t1 ? `¿Qué sentiste hoy?\n"${t1}"` : null,
+    t2 ? `¿Qué límite lograste poner?\n"${t2}"` : null,
+    t3 ? `¿Qué aprendiste sobre ti hoy?\n"${t3}"` : null,
+    t4 ? `¿Qué necesitas soltar?\n"${t4}"` : null,
+    t5 ? `¿De qué te sientes orgullosa hoy?\n"${t5}"` : null,
+  ].filter(Boolean).join('\n\n');
+
+  const sistemaPrompt = `Eres un panel de evaluación psicológica clínica que integra los métodos y perspectivas de los 10 psicólogos más influyentes de la historia:
+
+1. AARON BECK — Terapia cognitiva: detectas distorsiones cognitivas (catastrofización, pensamiento todo-o-nada, filtro mental, personalización, lectura de mente). Identificas el diálogo interno negativo automático.
+
+2. CARL ROGERS — Psicología humanista: escuchas con empatía radical, aceptas incondicionalmente, reflejas lo que la persona dice sin interpretar en exceso, ayudas a que se vea a sí misma con claridad y sin juicio.
+
+3. VIKTOR FRANKL — Logoterapia: buscas el sentido que la persona da a su sufrimiento. Detectas si hay vacío existencial, si la persona ha perdido el rumbo, si hay algo que todavía la ancla a la vida.
+
+4. MARSHA LINEHAN — DBT (Terapia Dialéctico Conductual): evalúas la regulación emocional, validas el dolor sin reforzar la evitación, identificas si la persona necesita habilidades de tolerancia al malestar o de efectividad interpersonal.
+
+5. ALBERT ELLIS — TREC: detectas creencias irracionales del tipo "debo ser perfecta", "necesito que me aprueben", "esto es insoportable". Señalas las exigencias absolutas que generan sufrimiento innecesario.
+
+6. BESSEL VAN DER KOLK — Trauma: lees entre líneas para detectar señales de trauma no procesado, reactivación somática, hipervigilancia o disociación emocional. El cuerpo lleva la cuenta.
+
+7. KRISTIN NEFF — Autocompasión: evalúas si la persona se trata con la misma compasión que trataría a una amiga. Detectas el autocrítica excesiva y propones el antídoto: ternura hacia una misma.
+
+8. DANIEL GOLEMAN — Inteligencia emocional: evalúas la autoconciencia emocional, la autorregulación, la empatía hacia sí misma, y la capacidad de gestionar relaciones.
+
+9. MARTIN SELIGMAN — Psicología positiva (PERMA): buscas indicadores de emociones positivas, compromiso, relaciones, sentido y logros. Evalúas si la persona tiene recursos de resiliencia o está en déficit.
+
+10. IRVIN YALOM — Psicoterapia existencial: exploras los temas de muerte, libertad, soledad e insignificancia que subyacen bajo el malestar. Buscas qué está evitando enfrentar y qué podría liberarla.
+
+---
+
+TU MISIÓN CLÍNICA:
+Analiza las respuestas de reflexión emocional diaria de esta persona con la mirada integrada de todos estos enfoques. Tu análisis debe ser:
+
+- ESPECÍFICO: cita sus palabras exactas cuando reflejen algo significativo
+- PROFUNDO: ve más allá de lo que dice, a lo que sugiere
+- CLÍNICO pero CÁLIDO: eres profesional sin ser frío, cercano sin ser condescendiente
+- ACCIONABLE: no solo describes, orientas hacia el cambio real
+- HONESTO: si hay algo preocupante, lo nombras con cuidado pero sin evitarlo
+
+Escribe en español, en segunda persona (tú), con tono de terapeuta experto que respeta profundamente a quien tiene delante.
+
+Estructura obligatoria con estos encabezados exactos:
+
+**ESTADO EMOCIONAL ACTUAL**
+(Diagnóstico clínico del momento emocional real. Qué emociones predominan, con qué intensidad, si hay contradicciones entre lo que dice y lo que revela. Cita sus palabras.)
+
+**LO QUE NOS DICE TU DIÁLOGO INTERNO**
+(Creencias, patrones, distorsiones cognitivas o fortalezas que revelan sus respuestas. Qué se dice a sí misma. Qué relación tiene con su propio valor. Cita sus palabras exactas.)
+
+**QUÉ NECESITAS AHORA MISMO**
+(Las 2-3 necesidades psicológicas más urgentes basadas en sus respuestas. Ser específica: no "cuidarte más" sino qué tipo de cuidado, para qué, cómo.)
+
+**PASOS CONCRETOS PARA ESTA SEMANA**
+(3-4 acciones prácticas, pequeñas y reales, derivadas directamente de lo que escribió. No genéricas. Que pueda hacer hoy o mañana.)
+
+**MENSAJE FINAL**
+(Un párrafo de cierre terapéutico: cálido, directo, que la vea de verdad. Que sienta que alguien la ha escuchado realmente.)`;
+
+
+  const nombre = JSON.parse(localStorage.getItem('inq-session') || '{}').nick || 'la persona';
+  const progData = getProgresoData ? getProgresoData() : null;
+  const diasFuertes = progData ? calcDiasFuertes(progData) : null;
+  const contexto = diasFuertes !== null ? `Contexto adicional: lleva ${diasFuertes} día${diasFuertes!==1?'s':''} de racha sin recaídas. Su nombre es ${nombre}.` : `Su nombre es ${nombre}.`;
+
+  const userPrompt = `${contexto}
+
+Estas son sus respuestas de hoy a las preguntas de reflexión emocional:
+
+${respuestasTexto}
+
+Analiza sus respuestas con toda la profundidad clínica que puedas. Ve más allá de lo superficial — qué hay debajo de lo que dice, qué patrones se repiten, qué necesita realmente. Sé específica, cita sus palabras, y oriéntala hacia acciones concretas.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1800,
+        system: sistemaPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+    if(!res.ok) throw new Error('API error ' + res.status);
+    const data = await res.json();
+    const texto = data?.content?.[0]?.text || '';
+    if(texto.length > 50) return texto;
+  } catch(e){
+    console.warn('IA no disponible, usando valoración offline:', e.message);
+  }
+
+  // ── FALLBACK OFFLINE ──
+  return generarValoracionTerapia(entry);
+}
+
+// ── FALLBACK: valoración offline cuando no hay conexión ──
+function generarValoracionTerapia(entry){
+  const t1 = (entry.ta1||'').trim();
+  const t2 = (entry.ta2||'').trim();
+  const t3 = (entry.ta3||'').trim();
+  const t4 = (entry.ta4||'').trim();
+  const t5 = (entry.ta5||'').trim();
+  const texto = [t1,t2,t3,t4,t5].join(' ').toLowerCase();
+
+  // ═══════════════════════════════════════════════════════
+  // MOTOR CLÍNICO INTEGRADO
+  // Beck · Rogers · Frankl · Linehan · Van der Kolk
+  // Gottman · Kristin Neff · Siegel · Yalom · Brené Brown
+  // ═══════════════════════════════════════════════════════
+
+  function cita(txt, n){
+    if(!txt) return '';
+    const w = txt.split(/\s+/).slice(0,n).join(' ');
+    return '"' + w + (txt.split(/\s+/).length > n ? '…' : '') + '"';
+  }
+  function corta(txt, max){ return txt.length > max ? txt.slice(0,max).trimEnd()+'…' : txt; }
+
+  // ── 1. INVENTARIO EMOCIONAL (Beck + Rogers) ──────────
+  const senales = {
+    depresion:     ['triste','tristeza','lloré','llorar','vacía','vacia','sola','hundida','sin ganas','no puedo','sin sentido','inútil','inutil','fracasé','fracas','culpa','culpable','vergüenza','avergonzada','me odio','no valgo','no sirvo','apagada'],
+    ansiedad:      ['ansiosa','ansiedad','nerviosa','nervios','miedo','angustia','angustiada','preocupada','preocupación','tensión','tension','agobio','abrumada','agitada','pánico','panico','estresada','estrés','bloqueo','me bloqueo'],
+    ira:           ['rabia','ira','enfadada','harta','molesta','frustrada','irritada','enfurecida','cabreada','odio','injusto','exploto'],
+    trauma:        ['me hace daño','me hizo daño','no me respetan','me ignoran','me gritan','me controlan','no me escuchan','abuso','maltrato','me humillan','me invalidan','no cuento','no valgo nada','nadie me ve','me da miedo él','me da miedo ella'],
+    agotamiento:   ['cansada','agotada','sin energía','no tengo fuerzas','no doy más','exhausta','desgastada','quemada','ya no puedo','no aguanto'],
+    soledad:       ['sola','nadie','no me entienden','incomprendida','aislada','sin apoyo','invisible','nadie me ve','me siento sola'],
+    autoexigencia: ['debería','no fui suficiente','tendría que','me exijo','me critico','no lo hice bien','fallé','me equivoqué','no está bien','podría haber'],
+    progreso:      ['pude','logré','avancé','mejoré','conseguí','superé','resistí','valiente','fuerza','orgullosa','crecí','aprendí','cambié','di un paso','lo hice'],
+    autocompasion: ['me perdoné','me cuidé','me di tiempo','fui amable conmigo','me escuché','me respeté','me permití','me quise'],
+    esperanza:     ['espero','quiero cambiar','voy a','mañana','ilusión','ganas','posible','seguiré','no me rindo','sigo']
+  };
+
+  const D = {};
+  for(const [k,words] of Object.entries(senales)){
+    D[k] = words.some(w => texto.includes(w));
+  }
+
+  const cargaNeg = ['depresion','ansiedad','ira','trauma','agotamiento','soledad','autoexigencia'].filter(k=>D[k]).length;
+  const cargaPos = ['progreso','autocompasion','esperanza'].filter(k=>D[k]).length;
+
+  // ── 2. DISTORSIONES COGNITIVAS (Beck + Ellis) ────────
+  const dist = [];
+  if(['debería','tendría que','debo','tengo que'].some(w=>texto.includes(w))) dist.push('obligatorio');
+  if(['siempre','nunca','jamás','todo','nada','absolutamente'].some(w=>texto.includes(w))) dist.push('absolutista');
+  if(['soy un fracaso','soy mala','soy una carga','no valgo','soy inútil','soy lo peor'].some(w=>texto.includes(w))) dist.push('etiquetado');
+  if(['van a pensar','creerán','pensarán','me juzgarán','qué dirán'].some(w=>texto.includes(w))) dist.push('lectura_mental');
+  if(['va a salir mal','seguro que falla','lo sé','va a pasar algo'].some(w=>texto.includes(w))) dist.push('prediccion');
+
+  // ── 3. RECURSOS INTERNOS (Linehan DBT) ──────────────
+  const rec = {
+    conciencia:      t1.length > 15,
+    regulacion:      D.autocompasion || (t2.length > 5),
+    autoconocimiento:t3.length > 15,
+    interpersonal:   t2.length > 10,
+    orgullo_activo:  t5.length > 5
+  };
+
+  // ── 4. SEÑALES DE TRAUMA (Van der Kolk) ─────────────
+  const trauma = D.trauma || ['me paralizo','me congelo','me disocio','no reacciono','no estaba en mí'].some(w=>texto.includes(w));
+
+  // ── 5. SENTIDO (Frankl) ──────────────────────────────
+  const sinSentido  = ['para qué','qué sentido','no entiendo por qué','sin propósito','no sirve de nada'].some(w=>texto.includes(w));
+  const conSentido  = ['me ayuda a','sirve para','aprendí que','tiene valor','me importa','por eso'].some(w=>texto.includes(w));
+
+  // ═══ CONSTRUCCIÓN DEL INFORME ═══════════════════════
+  const partes = [];
+
+  // ── BLOQUE A: ESTADO EMOCIONAL HOY ──────────────────
+  let apertura = '';
+  if(cargaNeg >= 4){
+    apertura = `Lo que describes hoy muestra una carga emocional considerable y sostenida. No se trata de un mal día aislado — el patrón que aparece en tus respuestas sugiere que llevas tiempo funcionando por encima de tus recursos. Tu sistema nervioso está dando señales claras de sobrecarga.`;
+  } else if(D.depresion && !D.progreso){
+    apertura = t1
+      ? `Escribiste que sentiste ${cita(t1,7)}. Lo que describes se acerca clínicamente a lo que llamamos agotamiento emocional sostenido o estado depresivo reactivo — no es fragilidad, es el resultado predecible de haber dado durante demasiado tiempo sin recibir suficiente. Tiene nombre, y tiene salida.`
+      : `Hay señales de vaciamiento emocional en tus palabras. No siempre el dolor tiene un nombre claro, pero sí tiene peso — y merece ser atendido, no ignorado.`;
+  } else if(D.ansiedad && !D.progreso){
+    apertura = t1
+      ? `Describes ${cita(t1,6)}. Cognitivamente, lo que experimentas es hiperactivación del sistema de amenaza: tu mente anticipa peligros incluso cuando no son inminentes. Eso consume una energía enorme. La ansiedad no es debilidad de carácter — es un sistema de alarma sobreactivado que necesita recalibración, no silencio.`
+      : `Hay una activación ansiosa presente en tu reflexión de hoy. Tu mente está en modo alerta constante. Eso es agotador — y es algo que se puede trabajar.`;
+  } else if(D.ira){
+    apertura = t1
+      ? `Sentiste ${cita(t1,6)}. La rabia es siempre una emoción secundaria: debajo de ella casi siempre hay dolor, una expectativa rota o una necesidad que no fue atendida. La pregunta terapéutica no es cómo apagarla, sino qué información contiene. Tu rabia te está diciendo algo importante.`
+      : `Hay frustración e irritación en lo que describes. Antes de gestionarla, conviene preguntarse: ¿qué necesidad mía no está siendo cubierta?`;
+  } else if(D.agotamiento){
+    apertura = `Lo que describes apunta a un agotamiento real y profundo — no el de un día difícil, sino el de alguien que lleva tiempo operando por encima de su capacidad. El agotamiento crónico afecta a la memoria, a la toma de decisiones, a la regulación emocional y a la percepción de uno mismo. No es un estado que se resuelva solo con voluntad.`;
+  } else if(D.progreso && cargaPos >= 2){
+    apertura = t1
+      ? `Comienzas con ${cita(t1,7)}. Lo que se percibe en tu reflexión de hoy no es el optimismo forzado — es la conciencia real de alguien en proceso activo de cambio. Hay movimiento genuino. Eso merece ser reconocido.`
+      : `Tu reflexión de hoy muestra una persona en crecimiento activo: hay conciencia de lo que sientes, hay acción y hay intención de mejorar. Los tres son necesarios, y tú los tienes.`;
+  } else {
+    apertura = t1
+      ? `Describes ${cita(t1,7)}. Hay presencia en esas palabras — la capacidad de observarte sin huir de lo que encuentras. Desde la psicología humanista de Rogers, esa conciencia sin juicio es la base sobre la que se construye cualquier cambio auténtico.`
+      : `El hecho de abrir este espacio y responder con honestidad ya es en sí mismo un acto terapéutico. Estás prestándote atención, y eso tiene más valor del que parece.`;
+  }
+  partes.push(apertura);
+
+  // ── BLOQUE B: PATRONES COGNITIVOS (Beck) ─────────────
+  if(dist.length > 0){
+    const msgs = {
+      obligatorio: `Aparecen en tu texto palabras como "debería" o "tendría que". En terapia cognitiva esto se llama pensamiento obligatorio — una voz interior muy exigente que condiciona tu valor a cumplir estándares imposibles. Esa voz aprendió a ser tan dura, y puede aprender a ser más justa.`,
+      absolutista:  `Usas términos absolutos: "siempre", "nunca", "todo" o "nada". El pensamiento absolutista amplifica el sufrimiento porque borra los matices reales de la situación. Cuando todo parece negro, casi siempre hay grises que la mente en dolor no ve.`,
+      etiquetado:   `Hay expresiones en las que te describes de forma muy dura y permanente. Esto es lo que Beck llama etiquetado negativo: convertir un comportamiento puntual en una identidad fija. "Fallé en esto" es muy diferente a "soy un fracaso". La primera es un hecho; la segunda, una mentira que duele.`,
+      lectura_mental:`Aparece la preocupación por lo que otros piensan o juzgan. Anticipar el juicio ajeno antes de que ocurra es una fuente enorme de ansiedad. La realidad: generalmente nos imaginamos juicios mucho más severos que los reales.`,
+      prediccion:   `Hay cierta tendencia a anticipar que las cosas saldrán mal. Esta predicción negativa tiene sentido cuando el pasado fue doloroso — pero es también una trampa cognitiva. La pregunta que rompe ese patrón es: ¿qué evidencia real tengo de que esto va a salir mal?`
+    };
+    const msg = dist.map(d=>msgs[d]).filter(Boolean)[0];
+    if(msg) partes.push(msg);
+  }
+
+  // ── BLOQUE C: AUTOCONOCIMIENTO (Siegel) ──────────────
+  if(t3){
+    partes.push(`Sobre lo que aprendiste hoy de ti misma escribiste: ${cita(t3,10)}. Desde la neurociencia interpersonal de Daniel Siegel, este tipo de reflexión — observar el propio estado interno y ponerle palabras — activa la corteza prefrontal medial y regula la amígdala. No es metáfora: escribir sobre lo que sientes cambia literalmente tu cerebro.`);
+  }
+
+  // ── BLOQUE D: LÍMITES (Gottman + Brené Brown) ────────
+  if(t2 && t2.length > 5){
+    partes.push(`Mencionas que pusiste un límite: "${corta(t2,65)}". Gottman y Brown coinciden en algo fundamental: los límites sanos no son muros ni rechazo — son comunicación directa de necesidades. Cada límite que estableces le enseña a tu entorno cómo tratarte, y te enseña a ti misma que tus necesidades son legítimas y merecen espacio.`);
+  } else if(cargaNeg >= 2){
+    partes.push(`No aparece ningún límite que hayas podido poner hoy. Cuando la carga emocional es alta, la capacidad de establecer límites se reduce — pero también es cuando más se necesitan. Una pregunta para explorar: ¿en qué relación o situación estás dando más de lo que puedes sostener?`);
+  }
+
+  // ── BLOQUE E: SOLTAR (Yalom — psicoterapia existencial) ─
+  if(t4 && t4.length > 5){
+    partes.push(`Dices que necesitas soltar ${cita(t4,8)}. Desde la psicoterapia existencial de Yalom, soltar no es olvidar ni traicionar lo que fue — es elegir conscientemente no dejar que algo ya ocurrido siga determinando lo que haces hoy. Esa elección, aunque pequeña, es uno de los actos de libertad más profundos que existen.`);
+  }
+
+  // ── BLOQUE F: AUTOCOMPASIÓN (Kristin Neff) ───────────
+  if(t5 && t5.length > 5){
+    partes.push(`Te sientes orgullosa de ${cita(t5,8)}. Kristin Neff, referente mundial en autocompasión, señala que reconocerse sin minimizar los propios logros es uno de los indicadores más sólidos de salud emocional. No pases por alto lo que escribiste. Ese logro, aunque te parezca pequeño, fue real.`);
+  } else if(!t5 || t5.length <= 3){
+    partes.push(`No has identificado nada de lo que sentirte orgullosa hoy. Esto puede indicar que el filtro autocrítico está muy activo, o que el agotamiento hace difícil ver lo que sí funciona. Tarea pequeña y concreta: busca una sola cosa que hayas hecho bien hoy — aunque sea haber completado esta reflexión.`);
+  }
+
+  // ── BLOQUE G: TRAUMA (Van der Kolk) ── solo si hay señales ─
+  if(trauma){
+    partes.push(`Hay señales en lo que escribes que sugieren que algunas experiencias pasadas siguen activas — en tus reacciones, en tu cuerpo, en cómo te relacionas. Lo que Van der Kolk describe como la huella del trauma no es un diagnóstico, sino una explicación: ciertas respuestas tuyas que quizás no entiendes tienen sentido a la luz de lo que has vivido. Acompañamiento profesional especializado en trauma podría ser muy valioso para ti.`);
+  }
+
+  // ── BLOQUE H: SENTIDO (Frankl) ───────────────────────
+  if(sinSentido && !conSentido){
+    partes.push(`Aparece en tu reflexión la pregunta del "¿para qué?". Frankl enseñó que el sufrimiento sin sentido es mucho más devastador que el que podemos integrar en una historia con significado. No tienes que tener la respuesta hoy. Pero vale la pena hacerse la pregunta: ¿qué parte de lo que estás viviendo podría tener un propósito, aunque todavía no lo veas?`);
+  }
+
+  // ── BLOQUE I: NECESIDADES CONCRETAS ──────────────────
+  const necesidades = [];
+  if(D.soledad) necesidades.push('Conexión genuina: busca una persona con quien puedas hablar de verdad, sin tener que estar bien.');
+  if(D.agotamiento) necesidades.push('Descanso real: no hacer menos cosas, sino parar completamente. Tu sistema nervioso lo necesita.');
+  if(D.ansiedad) necesidades.push('Regulación del sistema nervioso: respiración diafragmática, movimiento físico suave, técnicas de grounding.');
+  if(D.autoexigencia) necesidades.push('Trabajar la voz crítica interior: cada "debería" que te dices merece ser cuestionado. ¿Es eso realmente tuyo o es una voz que aprendiste?');
+  if(dist.includes('absolutista') || dist.includes('prediccion')) necesidades.push('Cuestionar los pensamientos automáticos: escríbelos, y después busca evidencia real a favor y en contra.');
+  if(D.depresion && !D.progreso) necesidades.push('Estructurar pequeñas victorias diarias: cuando todo parece pesado, recuperar la sensación de agencia empieza con acciones mínimas y concretas.');
+  if(trauma) necesidades.push('Explorar acompañamiento terapéutico especializado en trauma — no porque estés rota, sino porque mereces más que cargar esto sola.');
+  if(!rec.interpersonal && cargaNeg >= 2) necesidades.push('Practicar comunicar necesidades directamente, sin esperar a que otros las adivinen.');
+
+  if(necesidades.length > 0){
+    const lista = necesidades.slice(0,4).map((n,i)=>`${i+1}. ${n}`).join('\n');
+    partes.push(`LO QUE TU SITUACIÓN PIDE AHORA:\n\n${lista}`);
+  }
+
+  // ── BLOQUE J: CIERRE CLÍNICO Y HUMANO ────────────────
+  if(cargaNeg >= 4 || trauma){
+    partes.push(`Una nota importante: lo que describes hoy sugiere que podrías beneficiarte de acompañamiento profesional — no porque estés rota, sino porque mereces tener a alguien especializado a tu lado en este proceso. La terapia no es para cuando todo falla; es para cuando quieres avanzar con apoyo real.`);
+  } else if(D.progreso && cargaPos >= 2){
+    partes.push(`Estás en un momento de proceso genuino. Hay conciencia, hay movimiento y hay intención. Cada entrada que completas aquí es un dato sobre quién eres y hacia dónde vas. Sigue registrando. Sigue mirándote.`);
+  } else if(cargaNeg === 0 && cargaPos === 0){
+    partes.push(`Hoy ha sido un día de observación tranquila. No todos los días necesitan grandes revelaciones. A veces el trabajo más profundo ocurre exactamente aquí: en los días ordinarios, cuando simplemente te prestas atención sin exigirte nada extraordinario.`);
+  } else {
+    partes.push(`Cada reflexión que completas es información clínica sobre ti misma: sobre tus patrones, tus necesidades y tu capacidad de observarte sin juzgarte. Con el tiempo, este registro se convierte en un mapa real de tu crecimiento.`);
+  }
+
+  return partes.join('\n\n');
+}
+function renderTerapiaHist(){
+  const hist = JSON.parse(localStorage.getItem('inq-terapia-hist') || '[]');
+  const el   = document.getElementById('terapia-hist');
+  if(!hist.length){ el.innerHTML = '<div class="hist-empty">Tus reflexiones guardadas aparecerán aquí.</div>'; return; }
+  const LABELS = ['¿Qué sentiste hoy?','¿Qué límite pusiste?','¿Qué aprendiste?','¿Qué sueltas?','¿De qué te enorgulleces?'];
+  el.innerHTML = hist.slice(0,10).map(h => {
+    const fecha = new Date(h.fecha).toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+    const respuestas = [1,2,3,4,5].filter(i => h['ta'+i])
+      .map(i => `<div class="terapia-hist-item"><span class="terapia-hist-q">${LABELS[i-1]}</span><span class="terapia-hist-r">${h['ta'+i].slice(0,80)}${h['ta'+i].length>80?'…':''}</span></div>`)
+      .join('');
+    return `<div class="terapia-hist-card">
+      <div class="terapia-hist-fecha">${fecha}</div>
+      ${respuestas}
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// PERFIL
+// ═══════════════════════════════════════
+function renderPerfil(){
+  const sess  = JSON.parse(localStorage.getItem('inq-session') || '{}');
+  const noauth = document.getElementById('perfil-noauth');
+
+  if(!sess.loggedIn){
+    noauth.style.display = 'block';
+    document.getElementById('perfil-avatar').textContent = '?';
+    document.getElementById('perfil-nombre').textContent = 'Sin cuenta';
+    document.getElementById('perfil-nick').textContent   = '';
+    return;
+  }
+  noauth.style.display = 'none';
+
+  const letra = (sess.nick || sess.email || 'U')[0].toUpperCase();
+  document.getElementById('perfil-avatar').textContent   = letra;
+  document.getElementById('perfil-nombre').textContent   = sess.nick || sess.email;
+  document.getElementById('perfil-nick').textContent     = sess.email || '';
+
+  // fecha miembro
+  const accs = JSON.parse(localStorage.getItem('inq-accounts') || '{}');
+  const acc  = accs[sess.email] || {};
+  if(acc.fecha){
+    const f = new Date(acc.fecha).toLocaleDateString('es-ES',{month:'long',year:'numeric'});
+    document.getElementById('perfil-miembro').textContent = 'Miembro desde ' + f;
+  }
+
+  // stats
+  const dias  = calcDiasFuertes(getProgresoData());
+  const posts = JSON.parse(localStorage.getItem('inq-posts') || '[]')
+    .filter(p => p.autor === sess.nick).length;
+  const lvl   = localStorage.getItem('inq-user-level');
+  const LVLS  = ['La Grieta','El Despertar','Reconstrucción','Inquebrantable'];
+  document.getElementById('perfil-dias').textContent  = dias;
+  document.getElementById('perfil-posts').textContent = posts;
+  document.getElementById('perfil-nivel').textContent = lvl !== null ? LVLS[+lvl] : '—';
+
+  // bio guardada
+  const bio = localStorage.getItem('inq-bio-' + sess.email) || '';
+  document.getElementById('perfil-bio').value = bio;
+
+  // historial SOS
+  const sosHistEl = document.getElementById('perfil-sos-hist');
+  if(sosHistEl){
+    const sosHist = JSON.parse(localStorage.getItem('inq-sos-hist') || '[]');
+    if(!sosHist.length){
+      sosHistEl.innerHTML = '<div class="hist-empty">Aún no has usado el Modo SOS.</div>';
+    } else {
+      sosHistEl.innerHTML = sosHist.slice(0,8).map(s => {
+        const f = new Date(s.fecha).toLocaleDateString('es-ES',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+        return `<div class="hist-item" style="margin-bottom:8px">
+          <span class="hist-dot" style="color:rgba(122,175,139,0.8)">◎</span>
+          <span class="hist-fecha">${f}</span>
+          <span style="font-size:11px;color:var(--muted);margin-left:8px">${s.ciclos} ciclo${s.ciclos!==1?'s':''}</span>
+        </div>`;
+      }).join('');
+    }
+  }
+}
+function guardarPerfil(){
+  const sess = JSON.parse(localStorage.getItem('inq-session') || '{}');
+  if(!sess.loggedIn){ mostrarMsg('perfil-msg','Necesitas sesión para guardar.','err'); return; }
+  const bio  = document.getElementById('perfil-bio').value.trim();
+  localStorage.setItem('inq-bio-' + sess.email, bio);
+  mostrarMsg('perfil-msg','Perfil guardado ✦','ok');
+}
+
+// ═══════════════════════════════════════
+// NOTIFICACIONES
+// ═══════════════════════════════════════
+function getNotifs(){
+  return JSON.parse(localStorage.getItem('inq-notifs') || '[]');
+}
+function saveNotifs(n){ localStorage.setItem('inq-notifs', JSON.stringify(n)); }
+function añadirNotif(texto, tipo){
+  const notifs = getNotifs();
+  notifs.unshift({ id: Date.now(), texto, tipo: tipo||'general', leida: false, fecha: new Date().toISOString() });
+  saveNotifs(notifs.slice(0,50));
+  actualizarBadge();
+}
+function actualizarBadge(){
+  const n = getNotifs().filter(n => !n.leida).length;
+  const badge = document.getElementById('notifBadge');
+  if(!badge) return;
+  badge.style.display = n > 0 ? 'flex' : 'none';
+  badge.textContent   = n > 9 ? '9+' : n;
+}
+function renderNotifs(){
+  const notifs = getNotifs();
+  const el     = document.getElementById('notif-list');
+  if(!notifs.length){ el.innerHTML = '<div class="hist-empty">No tienes notificaciones todavía.</div>'; return; }
+  el.innerHTML = notifs.map(n => {
+    const fecha = new Date(n.fecha).toLocaleDateString('es-ES',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    return `<div class="notif-item ${n.leida?'notif-leida':''}" onclick="leerNotif(${n.id})">
+      <div class="notif-texto">${n.texto}</div>
+      <div class="notif-fecha">${fecha}</div>
+      ${!n.leida ? '<div class="notif-dot"></div>' : ''}
+    </div>`;
+  }).join('');
+}
+function leerNotif(id){
+  const notifs = getNotifs().map(n => n.id===id ? {...n, leida:true} : n);
+  saveNotifs(notifs);
+  actualizarBadge();
+  renderNotifs();
+}
+function marcarTodasLeidas(){
+  saveNotifs(getNotifs().map(n => ({...n, leida:true})));
+  actualizarBadge();
+  renderNotifs();
+}
+
+// notificación motivadora diaria
+(function notifDiaria(){
+  const hoy  = new Date().toDateString();
+  const last = localStorage.getItem('inq-notif-diaria');
+  if(last !== hoy){
+    const msgs = [
+      '🌸 Hoy es un buen día para elegirte a ti.',
+      '✦ Cada paso que das importa. Sigue.',
+      '💙 Eres más fuerte de lo que crees.',
+      '🌙 El descanso también es parte del camino.',
+      '◎ Respira. Estás exactamente donde debes estar.'
+    ];
+    añadirNotif(msgs[Math.floor(Math.random()*msgs.length)], 'diaria');
+    localStorage.setItem('inq-notif-diaria', hoy);
+  }
+  actualizarBadge();
+})();
+
+// ═══════════════════════════════════════
+// HELPER — mensajes inline
+// ═══════════════════════════════════════
+function mostrarMsg(id, txt, tipo){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.textContent = txt;
+  el.style.color = tipo === 'ok' ? 'var(--gold)' : 'var(--rose)';
+  setTimeout(() => { el.textContent = ''; }, 3500);
+}
+
+// ═══════════════════════════════════════
+// COMUNIDAD — extender publicarPost para notifs
+// ═══════════════════════════════════════
+const _origPublicar = publicarPost;
+// ya existe publicarPost, solo añadimos notif al hacer like
+const _origToggleHeart = toggleHeart;
+window.toggleHeartExtended = function(id){
+  _origToggleHeart(id);
+  const sess = JSON.parse(localStorage.getItem('inq-session') || '{}');
+  if(sess.loggedIn) añadirNotif('💗 Diste apoyo a una publicación del refugio.', 'apoyo');
+};
+
+// ─────────────────────────────────────
+// SOS — ciclos guiados con voz
+// ─────────────────────────────────────
+const SOS_PHRASES = [
+  "Todo pasa. Incluso esto.",
+  "Estás a salvo en este momento.",
+  "No tienes que resolver nada ahora.",
+  "Tu respiración te devuelve a ti.",
+  "Un aliento a la vez. Eso es suficiente.",
+  "Esto que sientes es temporal.",
+  "Estás volviendo a ti con cada espiración.",
+  "Aquí, contigo, en este instante.",
+  "La calma ya está dentro de ti.",
+  "Respira. El mundo puede esperar."
+];
+const SOS_MAX_CICLOS = 10;
+
+let sosBreathPhase  = 0;
+let sosBreathTimer  = null;
+let sosActive       = false;
+let sosCiclosActual = 0;
+
+function getSosHistorial(){
+  return JSON.parse(localStorage.getItem('inq-sos-hist') || '[]');
+}
+function getSosCount(){
+  const today = new Date().toDateString();
+  const data  = JSON.parse(localStorage.getItem('inq-sos-count') || '{}');
+  return data.date === today ? (data.count || 0) : 0;
+}
+function incrementSosCount(){
+  const today = new Date().toDateString();
+  const count = getSosCount() + 1;
+  localStorage.setItem('inq-sos-count', JSON.stringify({ date: today, count }));
+  return count;
+}
+function renderSosCounter(){
+  const count = getSosCount();
+  const lbl   = document.getElementById('sos-rescue-label');
+  if(lbl) lbl.textContent = count > 0 ? count + ' sesión' + (count > 1 ? 'es' : '') + ' hoy' : '';
+}
+
+function hablarSOS(texto){
+  return new Promise(resolve => {
+    if(!window.speechSynthesis){ setTimeout(resolve, 200); return; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(texto);
+    u.lang   = 'es-ES';
+    u.rate   = 0.68;   // muy suave y lento
+    u.pitch  = 1.10;   // dulce
+    u.volume = 0.80;
+    const voces = speechSynthesis.getVoices();
+    const vFem = voces.find(v => v.lang.startsWith('es') && /female|mujer|Monica|Paulina|Lucia|Conchita|María|Valeria/i.test(v.name))
+              || voces.find(v => v.lang.startsWith('es'));
+    if(vFem) u.voice = vFem;
+    u.onend = resolve; u.onerror = resolve;
+    speechSynthesis.speak(u);
+  });
+}
+
+function startSOSBreathing(){
+  if(sosActive) return;
+  sosActive       = true;
+  sosCiclosActual = 0;
+  sosBreathPhase  = 0;
+
+  incrementSosCount();
+  renderSosCounter();
+
+  const circle   = document.getElementById('breath-circle');
+  const circTxt  = document.getElementById('breath-circle-text');
+  const phaseLbl = document.getElementById('sos-phase-label');
+  const phraseEl = document.getElementById('sos-phrase');
+  const startBtn = document.getElementById('sos-start-btn');
+  const stopBtn  = document.getElementById('sos-stop-btn');
+  const ciclosRow= document.getElementById('sos-ciclos-row');
+  const ciclosNum= document.getElementById('sos-ciclos-num');
+  const reflexEl = document.getElementById('sos-reflexion');
+
+  startBtn.style.display = 'none';
+  stopBtn.style.display  = 'block';
+  ciclosRow.style.display= 'flex';
+  reflexEl.style.display = 'none';
+
+  clearInterval(sosBreathTimer);
+
+  async function runFase(){
+    if(!sosActive) return;
+
+    // frase al inicio de cada ciclo completo
+    if(sosBreathPhase === 0){
+      phraseEl.classList.add('fade');
+      setTimeout(()=>{
+        phraseEl.textContent = SOS_PHRASES[sosCiclosActual % SOS_PHRASES.length];
+        phraseEl.classList.remove('fade');
+      }, 400);
+    }
+
+    circle.classList.remove('sos-expand','sos-hold','sos-contract');
+    void circle.offsetWidth;
+
+    if(sosBreathPhase === 0){
+      circTxt.textContent = 'Inhala'; phaseLbl.textContent = '4 seg';
+      circle.classList.add('sos-expand');
+      await hablarSOS('Inhala');
+    } else if(sosBreathPhase === 1){
+      circTxt.textContent = 'Mantén'; phaseLbl.textContent = '4 seg';
+      circle.classList.add('sos-hold');
+      await hablarSOS('Mantén');
+    } else {
+      circTxt.textContent = 'Exhala'; phaseLbl.textContent = '4 seg';
+      circle.classList.add('sos-contract');
+      await hablarSOS('Exhala');
+    }
+
+    sosBreathPhase = (sosBreathPhase + 1) % 3;
+
+    // ciclo completo
+    if(sosBreathPhase === 0){
+      sosCiclosActual++;
+      ciclosNum.textContent = sosCiclosActual;
+      if(sosCiclosActual >= SOS_MAX_CICLOS){
+        sosActive = false;
+        finalizarSOS(sosCiclosActual);
+        return;
+      }
+    }
+
+    if(!sosActive) return;
+    sosBreathTimer = setTimeout(runFase, 4000);
+  }
+
+  runFase();
+}
+
+function sosMejor(){
+  sosActive = false;
+  clearTimeout(sosBreathTimer);
+  speechSynthesis && speechSynthesis.cancel();
+  finalizarSOS(sosCiclosActual);
+}
+
+function finalizarSOS(ciclos){
+  const circle   = document.getElementById('breath-circle');
+  const stopBtn  = document.getElementById('sos-stop-btn');
+  const startBtn = document.getElementById('sos-start-btn');
+  const phaseLbl = document.getElementById('sos-phase-label');
+  const circTxt  = document.getElementById('breath-circle-text');
+  const reflexEl = document.getElementById('sos-reflexion');
+  const postEl   = document.getElementById('sos-post');
+
+  circle.classList.remove('sos-expand','sos-hold','sos-contract');
+  circTxt.textContent  = '✦';
+  phaseLbl.textContent = '';
+  stopBtn.style.display  = 'none';
+  startBtn.style.display = 'block';
+  startBtn.innerHTML     = '<span>Volver a respirar</span>';
+
+  // reflexión final según ciclos
+  let reflexion;
+  if(ciclos <= 3){
+    reflexion = 'Volviste a ti misma muy rápido. Eso no es poca cosa — es una señal de que te estás conociendo mejor.';
+  } else if(ciclos <= 6){
+    reflexion = 'Le diste a tu cuerpo el tiempo que necesitaba. Quedarte contigo en los momentos difíciles es un acto de amor propio.';
+  } else {
+    reflexion = 'Te quedaste. Respiraste. Volviste. Eso es todo lo que había que hacer, y lo hiciste.';
+  }
+
+  reflexEl.textContent = reflexion;
+
+  // Limpiar textarea y hints previos
+  const ta = document.getElementById('sos-textarea');
+  const hint = document.getElementById('sos-escribe-hint');
+  if(ta){ ta.value = ''; ta.oninput = () => { if(hint) hint.textContent = ''; }; }
+  if(hint) hint.textContent = '';
+
+  // Mostrar sección post
+  if(postEl) postEl.style.display = 'block';
+
+  // guardar en historial
+  const hist = getSosHistorial();
+  hist.unshift({ fecha: new Date().toISOString(), ciclos });
+  localStorage.setItem('inq-sos-hist', JSON.stringify(hist.slice(0, 50)));
+
+  hablarSOS('Has vuelto. Estás aquí.');
+  renderSosCounter();
+  registrarHabito('sos');
+  añadirNotif('✦ Completaste una sesión SOS.', 'sos');
+
+  // scroll suave hacia la reflexión
+  setTimeout(() => {
+    const wrap = document.querySelector('.sos-fullscreen');
+    if(wrap) wrap.scrollTo({ top: wrap.scrollHeight, behavior: 'smooth' });
+  }, 400);
+}
+
+function guardarEscrituraSOS(){
+  const ta   = document.getElementById('sos-textarea');
+  const hint = document.getElementById('sos-escribe-hint');
+  const texto = (ta ? ta.value : '').trim();
+
+  if(!texto){
+    if(hint) hint.textContent = 'Escribe algo, aunque sea una palabra.';
+    return;
+  }
+
+  // Guardar en historial SOS con nota
+  const hist = getSosHistorial();
+  if(hist.length > 0) hist[0].nota = texto;
+  localStorage.setItem('inq-sos-hist', JSON.stringify(hist.slice(0, 50)));
+
+  // Respuesta empática breve
+  const textoL = texto.toLowerCase();
+  let respuesta;
+  if(['triste','llorar','dolor','sola','rota','vacía','perdida'].some(k=>textoL.includes(k))){
+    respuesta = 'Lo que sientes es válido. Y el hecho de que puedas nombrarlo ya es un paso.';
+  } else if(['ansiosa','miedo','angustia','nervios','pánico','agobio'].some(k=>textoL.includes(k))){
+    respuesta = 'La ansiedad miente sobre el futuro. Tú estás aquí, ahora, y estás bien.';
+  } else if(['rabia','harta','frustrada','enfadada','molesta'].some(k=>textoL.includes(k))){
+    respuesta = 'Tu rabia tiene razón en existir. Lo que haces con ella es tuyo. Y hoy elegiste respirar.';
+  } else {
+    respuesta = 'Gracias por escribirlo. Queda aquí, contigo. Puedes soltarlo ahora.';
+  }
+
+  if(hint){
+    hint.textContent = respuesta;
+    hint.style.color = 'rgba(190,215,245,0.65)';
+    hint.style.fontSize = '12px';
+  }
+  if(ta){
+    ta.style.borderColor = 'rgba(140,170,220,0.30)';
+    ta.disabled = true;
+  }
+  const btn = document.querySelector('.sos-escribe-btn span');
+  if(btn){ btn.textContent = 'Guardado ✦'; }
+
+  añadirNotif('✦ Escribiste cómo te sentías después del SOS.', 'sos');
+}
+
+function stopSOSBreathing(){
+  sosActive = false;
+  clearTimeout(sosBreathTimer);
+  speechSynthesis && speechSynthesis.cancel();
+  const circle = document.getElementById('breath-circle');
+  circle.classList.remove('sos-expand','sos-hold','sos-contract');
+  document.getElementById('breath-circle-text').textContent = '✦';
+  document.getElementById('sos-phase-label').textContent    = '';
+  document.getElementById('sos-phrase').textContent         = 'Estás a salvo en este momento.';
+  document.getElementById('sos-phrase').classList.remove('fade');
+  const btn = document.getElementById('sos-start-btn');
+  btn.style.display = 'block';
+  btn.innerHTML = '<span>Respirar contigo</span>';
+  const stopBtn = document.getElementById('sos-stop-btn');
+  if(stopBtn) stopBtn.style.display = 'none';
+  const postEl = document.getElementById('sos-post');
+  if(postEl) postEl.style.display = 'none';
+}
+// ─────────────────────────────────────
+// PWA — Service Worker
+// ─────────────────────────────────────
+// ═══════════════════════════════════════
+// SISTEMA PREMIUM
+// ═══════════════════════════════════════
+function isPremium(){ return user.premium; }
+
+function requierePremium(feature){ return !checkPremium(feature); }
+
+function activarPremiumDemo(){
+  user.premium = true;
+  toast('✦ Premium activado — 7 días gratis');
+  setTimeout(() => go('inicio'), 1200);
+}
+
+function irAProgramas(){
+  if(requierePremium('programas')) return;
+  go('programas');
+}
+
+// ── Override terapia para requerir premium ──
+const _go_orig = go;
+// (no sobreescribimos go, usamos wrapper específico para terapia)
+function irATerapia(){
+  if(requierePremium('terapia')) return;
+  go('terapia');
+}
+
+// ═══════════════════════════════════════
+// PROGRAMAS DE RECONSTRUCCIÓN
+// ═══════════════════════════════════════
+const PROGRAMAS = [
+  {
+    id: 'volver-a-ti',
+    icon: '🌱',
+    name: 'Volver a ti',
+    desc: 'Un programa de 21 días para reconectarte con quien eres cuando nadie te mira. Para las que se perdieron cuidando a todos los demás.',
+    tags: ['identidad','autoconocimiento','21 días'],
+    semanas: 3,
+    ejercicios: [
+      'Escribe 3 cosas que hacías antes que te daban vida',
+      'Pasa 10 minutos sola sin el móvil. Observa qué sientes',
+      'Identifica una creencia sobre ti misma que ya no te sirve',
+      'Haz algo hoy solo por ti, sin justificarlo',
+      'Escribe una carta a la versión de ti que empezó este programa',
+    ]
+  },
+  {
+    id: 'recuperar-valor',
+    icon: '💎',
+    name: 'Recuperar tu valor',
+    desc: 'Para cuando alguien te convenció de que vales menos. 14 días para recordar quién eres y qué mereces.',
+    tags: ['autoestima','límites','14 días'],
+    semanas: 2,
+    ejercicios: [
+      'Anota una vez que alguien te trató bien y lo rechazaste. ¿Por qué?',
+      'Lista 5 cosas que haces bien sin necesitar que nadie lo confirme',
+      'Identifica a alguien que drena tu energía. ¿Qué límite necesitas?',
+      'Di NO a algo hoy. Sin dar explicaciones largas',
+      'Escribe qué mereces recibir en una relación sana',
+    ]
+  },
+  {
+    id: 'poner-limites',
+    icon: '🔆',
+    name: 'Poner límites',
+    desc: 'Los límites no son muros, son puertas que tú controlas. 10 días de práctica real para aprender a decir lo que necesitas.',
+    tags: ['límites','comunicación','10 días'],
+    semanas: 2,
+    ejercicios: [
+      'Identifica un área donde no tienes límites. ¿Qué ocurre ahí?',
+      'Practica decir "necesito pensarlo" antes de comprometerte',
+      'Escribe cómo te sientes cuando dices SÍ sin querer',
+      'Observa: ¿quién respeta tus límites? ¿quién no?',
+      'Define un límite concreto que pondrás esta semana',
+    ]
+  },
+  {
+    id: 'sanar-relacion',
+    icon: '🌊',
+    name: 'Sanar una relación tóxica',
+    desc: 'Para las que salieron — o están saliendo — de una relación que las dejó pequeñas. 30 días de reconstrucción real.',
+    tags: ['trauma','recuperación','30 días'],
+    semanas: 4,
+    ejercicios: [
+      'Escribe sin filtros cómo te hizo sentir esa relación',
+      'Identifica qué necesidades intentabas cubrir ahí',
+      'Lista las señales que ignoraste. Sin juzgarte',
+      'Escribe qué parte de ti sobrevivió a esa relación',
+      'Describe cómo sería una relación que sí te cuida',
+    ]
+  }
+];
+
+function renderProgramas(){
+  const el = document.getElementById('programas-lista');
+  if(!el) return;
+  el.innerHTML = PROGRAMAS.map(p => {
+    const progreso = JSON.parse(localStorage.getItem('inq-prog-' + p.id) || '{"paso":0}');
+    const pct = Math.round((progreso.paso / p.ejercicios.length) * 100);
+    return `
+    <div class="programa-card" onclick="abrirPrograma('${p.id}')">
+      <div class="programa-header">
+        <span class="programa-icon">${p.icon}</span>
+        <span class="programa-name">${p.name}</span>
+      </div>
+      <div class="programa-desc">${p.desc}</div>
+      <div class="programa-tags">
+        ${p.tags.map(t=>`<span class="programa-tag">${t}</span>`).join('')}
+      </div>
+      ${pct > 0 ? `<div style="margin-top:10px;height:2px;background:var(--border);border-radius:2px">
+        <div style="height:100%;width:${pct}%;background:var(--rose);border-radius:2px;transition:width 0.5s"></div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:1px">${pct}% completado</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+let _progActualId = null;
+
+function abrirPrograma(id){
+  const p = PROGRAMAS.find(x => x.id === id);
+  if(!p) return;
+  _progActualId = id;
+
+  const progreso = JSON.parse(localStorage.getItem('inq-prog-' + id) || '{"paso":0,"reflexiones":{}}');
+  const paso = progreso.paso;
+  const totalPasos = p.ejercicios.length;
+  const completado = paso >= totalPasos;
+  const pct = Math.min(Math.round((paso / totalPasos) * 100), 100);
+
+  // Rellenar cabecera
+  document.getElementById('prog-det-icon').textContent    = p.icon;
+  document.getElementById('prog-det-name').textContent    = p.name;
+  document.getElementById('prog-det-semanas').textContent = p.tags.join(' · ');
+  document.getElementById('prog-det-desc').textContent    = p.desc;
+  document.getElementById('prog-det-barra').style.width   = pct + '%';
+  document.getElementById('prog-det-pct').textContent     = completado ? 'Completado ✦' : pct + '% completado · Paso ' + (paso + 1) + ' de ' + totalPasos;
+
+  const ejercicioWrap = document.getElementById('prog-det-ejercicio-wrap');
+  const reflexionWrap = document.getElementById('prog-det-reflexion-wrap');
+  const completoEl    = document.getElementById('prog-det-completo');
+  const ta            = document.getElementById('prog-det-textarea');
+  const hint          = document.getElementById('prog-det-hint');
+  const btnGuardar    = document.getElementById('prog-btn-guardar');
+
+  if(completado){
+    ejercicioWrap.style.display = 'none';
+    reflexionWrap.style.display = 'none';
+    completoEl.style.display    = 'block';
+  } else {
+    ejercicioWrap.style.display = 'block';
+    reflexionWrap.style.display = 'block';
+    completoEl.style.display    = 'none';
+
+    document.getElementById('prog-det-paso-lbl').textContent =
+      'Ejercicio ' + (paso + 1) + ' de ' + totalPasos;
+    document.getElementById('prog-det-ejercicio').textContent = p.ejercicios[paso];
+
+    // Cargar reflexión guardada si existe
+    const reflexGuardada = (progreso.reflexiones || {})[paso] || '';
+    ta.value    = reflexGuardada;
+    ta.disabled = false;
+    if(hint) hint.textContent = '';
+    if(btnGuardar){
+      const span = btnGuardar.querySelector ? btnGuardar : btnGuardar;
+      btnGuardar.textContent = reflexGuardada ? 'Reflexión guardada ✦' : 'Guardar reflexión';
+      btnGuardar.style.opacity = '1';
+    }
+  }
+
+  // Mostrar detalle, ocultar lista
+  document.getElementById('prog-vista-lista').style.display  = 'none';
+  document.getElementById('prog-vista-detalle').style.display = 'block';
+
+  // Scroll al top
+  const scroll = document.querySelector('#s-programas .screen-scroll');
+  if(scroll) scroll.scrollTop = 0;
+}
+
+function cerrarDetalleProg(){
+  document.getElementById('prog-vista-detalle').style.display = 'none';
+  document.getElementById('prog-vista-lista').style.display   = 'block';
+  renderProgramas();
+  _progActualId = null;
+}
+
+function checkProgBtnEscrip(){
+  // nada — el botón siempre está activo
+}
+
+function guardarReflexionProg(){
+  if(!_progActualId) return;
+  const ta   = document.getElementById('prog-det-textarea');
+  const hint = document.getElementById('prog-det-hint');
+  const btn  = document.getElementById('prog-btn-guardar');
+  const texto = (ta ? ta.value : '').trim();
+  if(!texto){
+    if(hint) hint.textContent = 'Escribe algo antes de guardar.';
+    return;
+  }
+
+  const p = PROGRAMAS.find(x => x.id === _progActualId);
+  const progreso = JSON.parse(localStorage.getItem('inq-prog-' + _progActualId) || '{"paso":0,"reflexiones":{}}');
+  if(!progreso.reflexiones) progreso.reflexiones = {};
+  progreso.reflexiones[progreso.paso] = texto;
+  localStorage.setItem('inq-prog-' + _progActualId, JSON.stringify(progreso));
+
+  if(hint) hint.textContent = 'Guardado. Puedes completar el ejercicio cuando te sientas lista.';
+  if(btn){ btn.textContent = 'Reflexión guardada ✦'; btn.style.opacity = '0.7'; }
+
+  toast('Reflexión guardada ✦');
+}
+
+function completarEjercicioProg(){
+  if(!_progActualId) return;
+  const p = PROGRAMAS.find(x => x.id === _progActualId);
+  if(!p) return;
+  const progreso = JSON.parse(localStorage.getItem('inq-prog-' + _progActualId) || '{"paso":0,"reflexiones":{}}');
+  const ta   = document.getElementById('prog-det-textarea');
+  const texto = (ta ? ta.value : '').trim();
+
+  // Guardar reflexión si hay texto
+  if(texto){
+    if(!progreso.reflexiones) progreso.reflexiones = {};
+    progreso.reflexiones[progreso.paso] = texto;
+  }
+
+  progreso.paso = (progreso.paso || 0) + 1;
+  localStorage.setItem('inq-prog-' + _progActualId, JSON.stringify(progreso));
+
+  registrarHabito('programa');
+  toast('Paso completado ✦');
+
+  // Refrescar la vista detalle
+  abrirPrograma(_progActualId);
+}
+
+// ═══════════════════════════════════════
+// SISTEMA DE HÁBITO DIARIO
+// ═══════════════════════════════════════
+const HABITO_MSGS = {
+  ritual:   ['Un día más cuidándote. Eso también es fuerza.', 'Tres minutos para ti. Hoy los usaste bien.', 'La constancia es la forma más silenciosa de amarte.'],
+  sos:      ['Pediste ayuda a tu propio cuerpo. Eso es valentía.', 'Supiste parar. No todo el mundo sabe hacerlo.', 'Cada vez que lo usas, aprendes a cuidarte mejor.'],
+  terapia:  ['Hoy te miraste por dentro. Eso no es fácil.', 'La reflexión que hiciste hoy es semilla de mañana.', 'Escribir lo que sientes es uno de los actos más valientes.'],
+  programa: ['Un paso más en tu camino. No se borran.', 'Hoy avanzaste. Aunque nadie lo vea, tú lo sabes.']
+};
+
+function registrarHabito(tipo){
+  const hoy = new Date().toDateString();
+  const habitos = JSON.parse(localStorage.getItem('inq-habitos') || '{}');
+
+  // Evitar mostrar el mismo tipo dos veces al día
+  if(habitos[hoy] && habitos[hoy].includes(tipo)) return;
+  if(!habitos[hoy]) habitos[hoy] = [];
+  habitos[hoy].push(tipo);
+  localStorage.setItem('inq-habitos', JSON.stringify(habitos));
+
+  // Aumentar días fuertes si completa 2+ hábitos hoy
+  if(habitos[hoy].length >= 2){
+    const d = getProgresoData();
+    const diasHoy = new Date().toDateString();
+    if(d.ultimoHabito !== diasHoy){
+      d.ultimoHabito = diasHoy;
+      saveProgresoData(d);
+    }
+  }
+
+  // Mostrar mensaje de hábito
+  const msgs = HABITO_MSGS[tipo] || HABITO_MSGS.ritual;
+  const msg = msgs[Math.floor(Math.random() * msgs.length)];
+  mostrarHabitoToast(msg, tipo === 'sos' ? '💙' : tipo === 'terapia' ? '✦' : '🌱');
+}
+
+function mostrarHabitoToast(msg, icon){
+  const t = document.getElementById('habito-toast');
+  const i = document.getElementById('habito-toast-icon');
+  const m = document.getElementById('habito-toast-msg');
+  // Limpiar botones previos
+  t.querySelectorAll('button').forEach(b => b.remove());
+  if(i) i.textContent = icon || '✦';
+  if(m) m.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 5000);
+}
+
+if ('serviceWorker' in navigator && location.protocol !== 'blob:' && location.hostname !== '') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(reg => console.log('SW registrado:', reg.scope))
+      .catch(err => console.warn('SW error:', err));
+  });
+}
+</script>
+
+<!-- ══════════════════════════════════
+     PANTALLA — PREMIUM
+══════════════════════════════════ -->
+<div class="screen" id="s-premium">
+  <div class="screen-scroll">
+    <div class="new-wrap">
+
+      <div class="premium-hero">
+        <span class="premium-crown">✦</span>
+        <div class="premium-title">Inquebratable</div>
+        <div class="premium-sub">Premium</div>
+        <div class="premium-quote">
+          "Hay momentos en los que sostenerse no es suficiente.<br>
+          Es momento de reconstruirte."
+        </div>
+      </div>
+
+      <div class="premium-benefits">
+        <div class="premium-benefit"><span class="premium-benefit-icon">✓</span><span>Terapia emocional profunda con evaluación de IA real</span></div>
+        <div class="premium-benefit"><span class="premium-benefit-icon">✓</span><span>Programas guiados de reconstrucción emocional</span></div>
+        <div class="premium-benefit"><span class="premium-benefit-icon">✓</span><span>Reflexiones emocionales avanzadas y personalizadas</span></div>
+        <div class="premium-benefit"><span class="premium-benefit-icon">✓</span><span>Historial completo de tu evolución emocional</span></div>
+        <div class="premium-benefit"><span class="premium-benefit-icon">✓</span><span>Herramientas avanzadas de regulación emocional</span></div>
+      </div>
+
+      <div class="premium-price-row">
+        <div class="premium-price-card">
+          <span class="premium-price-num">5,99€</span>
+          <span class="premium-price-lbl">al mes</span>
+        </div>
+        <div class="premium-price-card featured">
+          <span class="premium-price-num">49€</span>
+          <span class="premium-price-lbl">al año</span>
+          <span class="premium-price-save">Ahorra 22€</span>
+        </div>
+      </div>
+
+      <button class="btn-premium" onclick="activarPremiumDemo()">
+        Probar 7 días gratis
+      </button>
+      <button class="btn-premium-soft" onclick="activarPremiumDemo()">
+        Activar Premium
+      </button>
+
+      <p class="premium-nota">
+        Cancela cuando quieras. Sin compromisos.<br>
+        Tu bienestar no debería tener letra pequeña.
+      </p>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PANTALLA — PROGRAMAS
+══════════════════════════════════ -->
+<div class="screen" id="s-programas">
+  <div class="screen-scroll">
+    <div class="new-wrap">
+
+      <!-- VISTA LISTA -->
+      <div id="prog-vista-lista">
+        <div class="screen-label">Programas</div>
+        <p class="new-intro" style="margin-bottom:24px">Reconstrucción emocional guiada. Cada programa es un camino.</p>
+        <div id="programas-lista"></div>
+      </div>
+
+      <!-- VISTA DETALLE (oculta por defecto) -->
+      <div id="prog-vista-detalle" style="display:none">
+
+        <!-- Cabecera del programa -->
+        <button onclick="cerrarDetalleProg()" style="
+          background:none;border:none;color:var(--muted);
+          font-size:11px;letter-spacing:2px;text-transform:uppercase;
+          cursor:pointer;padding:0;margin-bottom:20px;display:flex;
+          align-items:center;gap:6px">
+          ← Volver
+        </button>
+
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+          <span id="prog-det-icon" style="font-size:28px"></span>
+          <div>
+            <div id="prog-det-name" style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--cream);font-weight:300"></div>
+            <div id="prog-det-semanas" style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)"></div>
+          </div>
+        </div>
+
+        <p id="prog-det-desc" style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px"></p>
+
+        <!-- Barra de progreso -->
+        <div style="height:2px;background:var(--border);border-radius:2px;margin-bottom:6px">
+          <div id="prog-det-barra" style="height:100%;background:var(--rose);border-radius:2px;transition:width 0.5s;width:0%"></div>
+        </div>
+        <div id="prog-det-pct" style="font-size:10px;color:var(--muted);margin-bottom:28px;letter-spacing:1px"></div>
+
+        <!-- Ejercicio actual -->
+        <div id="prog-det-ejercicio-wrap" style="
+          border:1px solid var(--border2);border-radius:10px;
+          padding:20px;background:rgba(196,48,106,0.04);
+          margin-bottom:20px">
+          <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;
+            color:var(--rose);margin-bottom:12px" id="prog-det-paso-lbl"></div>
+          <div id="prog-det-ejercicio" style="
+            font-family:'Cormorant Garamond',serif;
+            font-size:16px;color:var(--cream);
+            line-height:1.7;font-style:italic"></div>
+        </div>
+
+        <!-- Espacio de reflexión / escritura -->
+        <div id="prog-det-reflexion-wrap">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px;letter-spacing:0.5px">
+            Tu reflexión sobre este ejercicio
+          </div>
+          <textarea id="prog-det-textarea" style="
+            width:100%;min-height:110px;
+            background:rgba(255,255,255,0.03);
+            border:1px solid var(--border);border-radius:8px;
+            padding:14px 16px;color:var(--gold);
+            font-family:'DM Sans',sans-serif;font-size:13px;
+            line-height:1.7;resize:none;outline:none;
+            box-sizing:border-box;transition:border-color 0.3s;
+            -webkit-appearance:none"
+            placeholder="Escribe lo que este ejercicio te hace sentir o pensar…"
+            oninput="checkProgBtnEscrip()"></textarea>
+
+          <div id="prog-det-hint" style="
+            font-size:11px;color:var(--muted2);
+            min-height:18px;margin:8px 0 14px;
+            font-style:italic;line-height:1.5"></div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button id="prog-btn-guardar" onclick="guardarReflexionProg()" style="
+              flex:1;padding:13px;
+              background:rgba(196,48,106,0.08);
+              border:1px solid var(--border2);
+              border-radius:4px;color:var(--rose);
+              font-family:'DM Sans',sans-serif;
+              font-size:10px;letter-spacing:2.5px;
+              text-transform:uppercase;cursor:pointer;
+              transition:all 0.3s;min-width:120px">
+              Guardar reflexión
+            </button>
+            <button id="prog-btn-completar" onclick="completarEjercicioProg()" style="
+              flex:1;padding:13px;
+              background:linear-gradient(135deg,var(--terra),var(--rose));
+              border:none;border-radius:4px;color:#fff;
+              font-family:'DM Sans',sans-serif;
+              font-size:10px;letter-spacing:2.5px;
+              text-transform:uppercase;cursor:pointer;
+              min-width:120px">
+              Completado ✓
+            </button>
+          </div>
+        </div>
+
+        <!-- Botón volver inferior — para salir sin necesidad de subir -->
+        <div id="prog-det-volver-abajo" style="margin-top:18px;text-align:center">
+          <button onclick="cerrarDetalleProg()" style="
+            background:none;border:none;color:var(--muted);
+            font-size:11px;letter-spacing:2px;text-transform:uppercase;
+            cursor:pointer;padding:8px 0;display:inline-flex;
+            align-items:center;gap:6px">
+            ← Volver a programas
+          </button>
+        </div>
+
+        <!-- Mensaje cuando programa completado -->
+        <div id="prog-det-completo" style="display:none;text-align:center;padding:20px 0">
+          <div style="font-size:28px;margin-bottom:12px">✦</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--cream);margin-bottom:8px">
+            Programa completado
+          </div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.7">
+            Has recorrido este camino entera.<br>Lo que aprendiste aquí ya es tuyo para siempre.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hábito diario toast -->
+<div class="habito-toast" id="habito-toast">
+  <span class="habito-toast-icon" id="habito-toast-icon">✦</span>
+  <span id="habito-toast-msg">Un día más cuidándote. Eso también es fuerza.</span>
+</div>
+
+</body>
+</html>
